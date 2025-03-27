@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # README.md
 
 # Logiq Logic Game
@@ -35,3 +36,6 @@ Logiq is a logic puzzle game that challenges players to fill a grid with symbols
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
+=======
+# logiq
+>>>>>>> be7c66873b40c023aca95fcf6235e7525ef4172f
