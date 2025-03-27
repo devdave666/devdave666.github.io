@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://devdave666.github.io/logiq/sitemap.xml

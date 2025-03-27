@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Add AdSense verification meta tag -->
     <meta name="google-adsense-account" content="ca-pub-6398161093512510">
     <title>Logiq - Daily Logic Puzzle</title>
     <!-- Favicon implementation -->
@@ -17,7 +16,8 @@
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6398161093512510"
      crossorigin="anonymous"></script>
-    <script type="module" src="src/js/ads.js"></script>
+    <!-- Fix module path -->
+    <script type="module" src="./src/js/ads.js"></script>
 </head>
 <body>
     <main>
@@ -26,16 +26,13 @@
                 <h1>Logiq</h1>
                 <div id="timer">00:00</div>
             </div>
-            <div class="ad-container">
+            <div class="ad-container" data-ad-slot="header-ad">
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-client="ca-pub-6398161093512510"
-                     data-ad-slot="YOUR-AD-SLOT"
+                     data-ad-slot="5685335273"
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
             </div>
             <div id="game-controls">
                 <button id="rulesBtn">Rules</button>
@@ -52,17 +49,13 @@
     </main>
 
     <!-- Ad container before footer -->
-    <div class="ad-container" data-ad-slot="test-slot-1">
+    <div class="ad-container" data-ad-slot="footer-ad">
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-6398161093512510"
-             data-ad-slot="test-slot-1"
+             data-ad-slot="5685335273"
              data-ad-format="auto"
-             data-full-width-responsive="true"
-             data-adtest="on"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+             data-full-width-responsive="true"></ins>
     </div>
 
     <div id="rules-modal" class="modal">
@@ -83,5 +76,10 @@
     <script type="module" src="./src/js/generator.js"></script>
     <script type="module" src="./src/js/solver.js"></script>
     <script type="module" src="./src/js/game.js"></script>
+
+    <!-- Add privacy policy link -->
+    <footer>
+        <a href="./privacy.html">Privacy Policy</a>
+    </footer>
 </body>
 </html>
