@@ -1,0 +1,17 @@
+{
+  "name": "logiq-game",
+  "version": "1.0.0",
+  "description": "A daily logic puzzle game",
+  "main": "src/js/game.js",
+  "scripts": {
+    "start": "serve .",
+    "test": "jest"
+  },
+  "dependencies": {
+    "serve": "^14.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0"
+  }
+}

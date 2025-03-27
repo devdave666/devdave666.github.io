@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logiq - Daily Logic Puzzle</title>
+    <!-- Favicon implementation -->
+    <link rel="icon" type="image/svg+xml" href="src/images/tangram.svg">
+    <link rel="shortcut icon" type="image/svg+xml" href="src/images/tangram.svg">
+    <link rel="icon" type="image/x-icon" href="src/images/tangram.svg">
+    <link rel="apple-touch-icon" href="src/images/tangram.svg">
+    <!-- Force favicon refresh with version parameter -->
+    <link rel="icon" type="image/svg+xml" href="src/images/tangram.svg?v=2">
+    <link rel="stylesheet" href="src/css/styles.css">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6398161093512510"
+     crossorigin="anonymous"></script>
+    <!-- Google AdSense with test parameters -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6398161093512510"></script>
+    <script type="module" src="src/js/ads.js"></script>
+</head>
+<body>
+    <main>
+        <div id="game-container">
+            <div id="game-header">
+                <h1>Logiq</h1>
+                <div id="timer">00:00</div>
+            </div>
+            <div class="ad-container">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-6398161093512510"
+                     data-ad-slot="YOUR-AD-SLOT"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            <div id="game-controls">
+                <button id="rulesBtn">Rules</button>
+                <button id="newGameBtn">New Game</button>
+                <button id="hintBtn">Hint</button>
+                <button id="undoBtn">Undo</button>
+                <button id="clearBtn">Clear</button>
+            </div>
+            <div id="game-grid"></div>
+            <div id="answer-control">
+                <button id="showAnswerBtn" class="answer-button">Show Answer</button>        
+            </div>
+        </div>
+    </main>
+
+    <!-- Ad container before footer -->
+    <div class="ad-container" data-ad-slot="test-slot-1">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-6398161093512510"
+             data-ad-slot="test-slot-1"
+             data-ad-format="auto"
+             data-full-width-responsive="true"
+             data-adtest="on"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
+    <div id="rules-modal" class="modal">
+        <div class="modal-content">
+            <h2>How to Play Logiq</h2>
+            <ul>
+                <li>Fill the grid with suns (☀️) and moons (🌑)</li>
+                <li>Each row and column must have an equal number of each symbol</li>
+                <li>No more than two identical symbols can be adjacent</li>
+                <li>Cells connected by '=' must contain the same symbol</li>
+                <li>Cells connected by '×' must contain different symbols</li>
+            </ul>
+            <button id="closeRules">Close</button>
+        </div>
+    </div>
+
+    <script type="module" src="src/js/utils.js"></script>
+    <script type="module" src="src/js/generator.js"></script>
+    <script type="module" src="src/js/solver.js"></script>
+    <script type="module" src="src/js/game.js"></script>
+</body>
+</html>
