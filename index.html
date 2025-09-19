@@ -47,6 +47,33 @@
             <div id="answer-control">
                 <button id="showAnswerBtn" class="answer-button">Show Answer</button>        
             </div>
+            
+            <!-- Game Rules and Legend -->
+            <div id="game-legend">
+                <h3>Game Rules</h3>
+                <ul>
+                    <li>Fill grid with suns (☀️) and moons (🌑)</li>
+                    <li>Each row/column must have exactly 3 of each symbol</li>
+                    <li>No more than 2 consecutive identical symbols</li>
+                    <li>Follow constraint symbols: <strong>=</strong> (same) and <strong>×</strong> (different)</li>
+                </ul>
+                
+                <h3>Highlight Colors</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-color red"></div>
+                        <span>Red: 3+ consecutive symbols or too many in row/column</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color purple"></div>
+                        <span>Purple: Constraint violations (= or × rules broken)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color orange"></div>
+                        <span>Orange: Balance violations (more than 3 of same type)</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 

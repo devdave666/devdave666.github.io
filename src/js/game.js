@@ -295,6 +295,10 @@ class TangoGame {
 
     revealSolution() {
         if (!this.solution) return;
+        
+        // Clear highlights immediately when showing solution
+        this.clearInvalidHighlights();
+        
         let delay = 0;
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
@@ -534,6 +538,9 @@ class TangoGame {
             clearInterval(this.timerInterval);
             const timeTaken = Math.floor((new Date() - this.startTime) / 1000);
             const timeString = this.formatTime(timeTaken);
+            
+            // Clear highlights when puzzle is solved
+            this.clearInvalidHighlights();
             
             // Save stats
             this.stats.recordWin(timeTaken, this.difficulty);
