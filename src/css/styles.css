@@ -61,12 +61,96 @@ button:hover {
     }
 }
 
-#game-container {
+#app-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin: 20px auto;
     padding: 20px;
+    max-width: 1200px;
+}
+
+#app-header {
+    text-align: center;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Game Tabs */
+#game-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 5px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#game-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 80px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.tab-button:hover {
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+    transform: translateY(-2px);
+}
+
+.tab-button.active {
+    background: #3498db;
+    color: white;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.tab-icon {
+    font-size: 20px;
+    display: block;
+}
+
+.tab-name {
+    font-weight: 500;
+    font-size: 11px;
+}
+
+/* Game Container */
+#game-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.game-panel {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.game-panel.active {
+    display: flex;
 }
 
 #game-grid {
@@ -215,7 +299,8 @@ button:hover {
     background-color: #c0392b;
 }
 
-#game-controls {
+#game-controls,
+.game-controls {
     display: flex;
     gap: 12px;
     margin: 25px 0;
@@ -230,6 +315,316 @@ button:hover {
     display: flex;
     justify-content: center;
     margin: 20px 0;
+}
+
+/* Sudoku Styles */
+#sudoku-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 40px);
+    gap: 1px;
+    background-color: #2c3e50;
+    padding: 2px;
+    border-radius: 8px;
+    margin: 20px auto;
+}
+
+.sudoku-cell {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sudoku-cell:nth-child(3n):not(:nth-child(9n)) {
+    border-right: 2px solid #2c3e50;
+}
+
+.sudoku-cell:nth-child(n+19):nth-child(-n+27),
+.sudoku-cell:nth-child(n+46):nth-child(-n+54) {
+    border-bottom: 2px solid #2c3e50;
+}
+
+.sudoku-cell.fixed {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+}
+
+.sudoku-cell.selected {
+    background-color: #3498db;
+    color: white;
+}
+
+.sudoku-cell.invalid {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.number-pad {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 20px;
+    max-width: 300px;
+}
+
+.number-btn {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #3498db;
+    background: white;
+    color: #3498db;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.number-btn:hover {
+    background: #3498db;
+    color: white;
+}
+
+.number-btn.active {
+    background: #3498db;
+    color: white;
+}
+
+.erase-btn {
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.erase-btn:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+/* Nonogram Styles */
+#nonogram-grid {
+    display: grid;
+    gap: 1px;
+    background-color: #2c3e50;
+    padding: 2px;
+    border-radius: 8px;
+    margin: 20px auto;
+}
+
+.nonogram-cell {
+    width: 25px;
+    height: 25px;
+    background: white;
+    border: 1px solid #bdc3c7;
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.nonogram-cell.filled {
+    background: #2c3e50;
+}
+
+.nonogram-cell.marked {
+    background: white;
+    position: relative;
+}
+
+.nonogram-cell.marked::after {
+    content: '×';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #e74c3c;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.nonogram-clue {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: #2c3e50;
+    background: #ecf0f1;
+}
+
+.drawing-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.draw-mode {
+    padding: 10px 15px;
+    border: 2px solid #3498db;
+    background: white;
+    color: #3498db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.draw-mode:hover,
+.draw-mode.active {
+    background: #3498db;
+    color: white;
+}
+
+/* Bridges Styles */
+#bridges-grid {
+    display: grid;
+    gap: 0;
+    margin: 20px auto;
+    position: relative;
+}
+
+.bridge-island {
+    width: 40px;
+    height: 40px;
+    background: #3498db;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+}
+
+.bridge-connection {
+    position: absolute;
+    background: #2c3e50;
+    z-index: 1;
+}
+
+.bridge-connection.horizontal {
+    height: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.bridge-connection.vertical {
+    width: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.bridge-connection.double {
+    background: repeating-linear-gradient(
+        90deg,
+        #2c3e50,
+        #2c3e50 8px,
+        transparent 8px,
+        transparent 12px
+    );
+}
+
+.bridge-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.bridge-mode {
+    padding: 10px 15px;
+    border: 2px solid #3498db;
+    background: white;
+    color: #3498db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.bridge-mode:hover,
+.bridge-mode.active {
+    background: #3498db;
+    color: white;
+}
+
+/* Sequence Styles */
+#sequence-display {
+    background: white;
+    border: 2px solid #3498db;
+    border-radius: 12px;
+    padding: 30px;
+    margin: 20px 0;
+    text-align: center;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.sequence-numbers {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    letter-spacing: 8px;
+}
+
+.sequence-question {
+    font-size: 18px;
+    color: #7f8c8d;
+    margin-bottom: 10px;
+}
+
+.sequence-pattern {
+    font-size: 14px;
+    color: #95a5a6;
+    font-style: italic;
+}
+
+#sequence-input {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#sequence-answer {
+    padding: 12px 20px;
+    border: 2px solid #3498db;
+    border-radius: 8px;
+    font-size: 18px;
+    text-align: center;
+    width: 150px;
+    outline: none;
+}
+
+#sequence-answer:focus {
+    border-color: #2980b9;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+}
+
+#sequence-submit {
+    padding: 12px 24px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#sequence-submit:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
 }
 
 .answer-button {
@@ -300,20 +695,7 @@ button:hover {
 /* Update media queries */
 @media (max-width: 600px) {
     h1 {
-        font-size: 2em;
-    }
-
-    button {
-        width: 100%;
-    }
-    
-    :root {
-        --cell-size: 45px;  /* Smaller cells for mobile */
-    }
-
-    #game-controls {
-        gap: 5px;
-        padding: 0 10px;
+        font-size: 1.8em;
     }
 
     button {
@@ -321,14 +703,103 @@ button:hover {
         min-width: 80px;
         font-size: 13px;
     }
+    
+    :root {
+        --cell-size: 45px;  /* Smaller cells for mobile */
+    }
 
-    h1 {
-        font-size: 1.8em;
+    #game-controls,
+    .game-controls {
+        gap: 5px;
+        padding: 0 10px;
     }
 
     #timer {
         font-size: 1.2em;
         padding: 3px 10px;
+    }
+
+    /* Tab adjustments */
+    #game-tabs {
+        gap: 3px;
+        padding: 3px;
+    }
+
+    .tab-button {
+        padding: 8px 12px;
+        min-width: 70px;
+    }
+
+    .tab-icon {
+        font-size: 16px;
+    }
+
+    .tab-name {
+        font-size: 10px;
+    }
+
+    /* Game-specific mobile adjustments */
+    .sudoku-cell {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    #sudoku-grid {
+        grid-template-columns: repeat(9, 35px);
+    }
+
+    .number-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+    }
+
+    .number-pad {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        max-width: 280px;
+    }
+
+    .nonogram-cell {
+        width: 20px;
+        height: 20px;
+    }
+
+    .bridge-island {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    #bridges-grid {
+        grid-template-columns: repeat(8, 40px);
+        grid-template-rows: repeat(8, 40px);
+    }
+
+    #sequence-display {
+        padding: 20px;
+        margin: 15px 0;
+    }
+
+    .sequence-numbers {
+        font-size: 20px;
+        letter-spacing: 4px;
+    }
+
+    .sequence-question {
+        font-size: 16px;
+    }
+
+    #sequence-answer {
+        width: 120px;
+        padding: 10px 15px;
+        font-size: 16px;
+    }
+
+    #sequence-submit {
+        padding: 10px 20px;
+        font-size: 14px;
     }
 }
 

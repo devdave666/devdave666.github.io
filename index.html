@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-6398161093512510">
-    <title>Logiq - Daily Logic Puzzle</title>
+    <title>Logic Games Hub - Daily Brain Training</title>
     <!-- Favicon implementation -->
     <link rel="icon" type="image/svg+xml" href="/src/images/tangram.svg">
     <link rel="shortcut icon" type="image/svg+xml" href="/src/images/tangram.svg">
@@ -21,11 +21,36 @@
 </head>
 <body>
     <main>
-        <div id="game-container">
-            <div id="game-header">
-                <h1>Logiq</h1>
+        <div id="app-container">
+            <div id="app-header">
+                <h1>Logic Games Hub</h1>
                 <div id="timer">00:00</div>
             </div>
+            
+            <!-- Game Tabs -->
+            <div id="game-tabs">
+                <button type="button" class="tab-button active" data-game="logiq">
+                    <span class="tab-icon">🌙</span>
+                    <span class="tab-name">Logiq</span>
+                </button>
+                <button type="button" class="tab-button" data-game="sudoku">
+                    <span class="tab-icon">🔢</span>
+                    <span class="tab-name">Sudoku</span>
+                </button>
+                <button type="button" class="tab-button" data-game="nonogram">
+                    <span class="tab-icon">🎨</span>
+                    <span class="tab-name">Nonogram</span>
+                </button>
+                <button type="button" class="tab-button" data-game="bridges">
+                    <span class="tab-icon">🌉</span>
+                    <span class="tab-name">Bridges</span>
+                </button>
+                <button type="button" class="tab-button" data-game="sequence">
+                    <span class="tab-icon">🧩</span>
+                    <span class="tab-name">Sequence</span>
+                </button>
+            </div>
+
             <div class="ad-container" data-ad-slot="header-ad">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -34,18 +59,107 @@
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
             </div>
-            <div id="game-controls">
-                <button id="rulesBtn">Rules</button>
-                <button id="newGameBtn">New Game</button>
-                <button id="difficultyBtn">Difficulty</button>
-                <button id="hintBtn">Hint</button>
-                <button id="undoBtn">Undo</button>
-                <button id="clearBtn">Clear</button>
-                <button id="statsBtn">Stats</button>
-            </div>
-            <div id="game-grid"></div>
-            <div id="answer-control">
-                <button id="showAnswerBtn" class="answer-button">Show Answer</button>        
+
+            <!-- Game Container -->
+            <div id="game-container">
+                <!-- Logiq Game -->
+                <div id="logiq-game" class="game-panel active">
+                    <div id="game-controls">
+                        <button type="button" id="rulesBtn">Rules</button>
+                        <button type="button" id="newGameBtn">New Game</button>
+                        <button type="button" id="difficultyBtn">Difficulty</button>
+                        <button type="button" id="hintBtn">Hint</button>
+                        <button type="button" id="undoBtn">Undo</button>
+                        <button type="button" id="clearBtn">Clear</button>
+                        <button type="button" id="statsBtn">Stats</button>
+                    </div>
+                    <div id="game-grid"></div>
+                    <div id="answer-control">
+                        <button type="button" id="showAnswerBtn" class="answer-button">Show Answer</button>        
+                    </div>
+                </div>
+
+                <!-- Sudoku Game -->
+                <div id="sudoku-game" class="game-panel">
+                    <div class="game-controls">
+                        <button type="button" class="rules-btn" data-game="sudoku">Rules</button>
+                        <button type="button" class="new-game-btn" data-game="sudoku">New Game</button>
+                        <button type="button" class="difficulty-btn" data-game="sudoku">Difficulty</button>
+                        <button type="button" class="hint-btn" data-game="sudoku">Hint</button>
+                        <button type="button" class="undo-btn" data-game="sudoku">Undo</button>
+                        <button type="button" class="clear-btn" data-game="sudoku">Clear</button>
+                        <button type="button" class="stats-btn" data-game="sudoku">Stats</button>
+                    </div>
+                    <div id="sudoku-grid"></div>
+                    <div class="number-pad">
+                        <button type="button" class="number-btn" data-number="1">1</button>
+                        <button type="button" class="number-btn" data-number="2">2</button>
+                        <button type="button" class="number-btn" data-number="3">3</button>
+                        <button type="button" class="number-btn" data-number="4">4</button>
+                        <button type="button" class="number-btn" data-number="5">5</button>
+                        <button type="button" class="number-btn" data-number="6">6</button>
+                        <button type="button" class="number-btn" data-number="7">7</button>
+                        <button type="button" class="number-btn" data-number="8">8</button>
+                        <button type="button" class="number-btn" data-number="9">9</button>
+                        <button type="button" class="number-btn erase-btn" data-number="0">✖</button>
+                    </div>
+                </div>
+
+                <!-- Nonogram Game -->
+                <div id="nonogram-game" class="game-panel">
+                    <div class="game-controls">
+                        <button type="button" class="rules-btn" data-game="nonogram">Rules</button>
+                        <button type="button" class="new-game-btn" data-game="nonogram">New Game</button>
+                        <button type="button" class="difficulty-btn" data-game="nonogram">Difficulty</button>
+                        <button type="button" class="hint-btn" data-game="nonogram">Hint</button>
+                        <button type="button" class="undo-btn" data-game="nonogram">Undo</button>
+                        <button type="button" class="clear-btn" data-game="nonogram">Clear</button>
+                        <button type="button" class="stats-btn" data-game="nonogram">Stats</button>
+                    </div>
+                    <div id="nonogram-grid"></div>
+                    <div class="drawing-controls">
+                        <button type="button" class="draw-mode active" data-mode="fill">🖤 Fill</button>
+                        <button type="button" class="draw-mode" data-mode="mark">❌ Mark</button>
+                        <button type="button" class="draw-mode" data-mode="erase">🗑️ Erase</button>
+                    </div>
+                </div>
+
+                <!-- Bridges Game -->
+                <div id="bridges-game" class="game-panel">
+                    <div class="game-controls">
+                        <button type="button" class="rules-btn" data-game="bridges">Rules</button>
+                        <button type="button" class="new-game-btn" data-game="bridges">New Game</button>
+                        <button type="button" class="difficulty-btn" data-game="bridges">Difficulty</button>
+                        <button type="button" class="hint-btn" data-game="bridges">Hint</button>
+                        <button type="button" class="undo-btn" data-game="bridges">Undo</button>
+                        <button type="button" class="clear-btn" data-game="bridges">Clear</button>
+                        <button type="button" class="stats-btn" data-game="bridges">Stats</button>
+                    </div>
+                    <div id="bridges-grid"></div>
+                    <div class="bridge-controls">
+                        <button type="button" class="bridge-mode active" data-mode="single">— Single</button>
+                        <button type="button" class="bridge-mode" data-mode="double">= Double</button>
+                        <button type="button" class="bridge-mode" data-mode="remove">✖ Remove</button>
+                    </div>
+                </div>
+
+                <!-- Sequence Game -->
+                <div id="sequence-game" class="game-panel">
+                    <div class="game-controls">
+                        <button type="button" class="rules-btn" data-game="sequence">Rules</button>
+                        <button type="button" class="new-game-btn" data-game="sequence">New Game</button>
+                        <button type="button" class="difficulty-btn" data-game="sequence">Difficulty</button>
+                        <button type="button" class="hint-btn" data-game="sequence">Hint</button>
+                        <button type="button" class="undo-btn" data-game="sequence">Undo</button>
+                        <button type="button" class="clear-btn" data-game="sequence">Clear</button>
+                        <button type="button" class="stats-btn" data-game="sequence">Stats</button>
+                    </div>
+                    <div id="sequence-display"></div>
+                    <div id="sequence-input">
+                        <input type="text" id="sequence-answer" placeholder="Enter the next number in sequence...">
+                        <button type="button" id="sequence-submit">Submit</button>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -60,45 +174,12 @@
              data-full-width-responsive="true"></ins>
     </div>
 
+    <!-- Dynamic Rules Modal -->
     <div id="rules-modal" class="modal">
         <div class="modal-content">
-            <h2>How to Play Logiq</h2>
-            <div class="rules-section">
-                <h3>Game Rules</h3>
-                <ul>
-                    <li>Fill the grid with suns (☀️) and moons (🌑)</li>
-                    <li>Each row and column must have exactly 3 of each symbol</li>
-                    <li>No more than 2 consecutive identical symbols</li>
-                    <li>Follow constraint symbols: <strong>=</strong> (same) and <strong>×</strong> (different)</li>
-                </ul>
-            </div>
-            <div class="rules-section">
-                <h3>Error Highlight Colors</h3>
-                <div class="legend-items">
-                    <div class="legend-item">
-                        <div class="legend-color red"></div>
-                        <span>Red: 3+ consecutive symbols or too many in row/column</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color purple"></div>
-                        <span>Purple: Constraint violations (= or × rules broken)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color orange"></div>
-                        <span>Orange: Balance violations (more than 3 of same type)</span>
-                    </div>
-                </div>
-            </div>
-            <div class="rules-section">
-                <h3>Keyboard Shortcuts</h3>
-                <ul>
-                    <li><kbd>Ctrl+N</kbd> - New Game</li>
-                    <li><kbd>Ctrl+H</kbd> - Show Hint</li>
-                    <li><kbd>Ctrl+Z</kbd> - Undo</li>
-                    <li><kbd>Ctrl+R</kbd> - Clear Grid</li>
-                    <li><kbd>?</kbd> - Show Rules</li>
-                    <li><kbd>Esc</kbd> - Close Modal</li>
-                </ul>
+            <h2 id="rules-title">Game Rules</h2>
+            <div id="rules-content">
+                <!-- Content will be dynamically loaded based on active game -->
             </div>
             <div class="modal-buttons">
                 <button type="button" id="closeRules" class="close-modal">Close</button>
@@ -106,11 +187,17 @@
         </div>
     </div>
 
+    <!-- Scripts -->
     <script type="module" src="/src/js/utils.js"></script>
     <script type="module" src="/src/js/stats.js"></script>
     <script type="module" src="/src/js/generator.js"></script>
     <script type="module" src="/src/js/solver.js"></script>
     <script type="module" src="/src/js/game.js"></script>
+    <script type="module" src="/src/js/games/sudoku.js"></script>
+    <script type="module" src="/src/js/games/nonogram.js"></script>
+    <script type="module" src="/src/js/games/bridges.js"></script>
+    <script type="module" src="/src/js/games/sequence.js"></script>
+    <script type="module" src="/src/js/app.js"></script>
 
     <!-- Add privacy policy link -->
     <footer>

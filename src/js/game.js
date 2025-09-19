@@ -207,17 +207,49 @@ class TangoGame {
     }
 
     showRules() {
-        const modal = document.getElementById('rules-modal');
-        if (modal) {
-            modal.style.display = 'block';
-            
-            const closeBtn = document.getElementById('closeRules');
-            const closeHandler = () => {
-                modal.style.display = 'none';
-                closeBtn.removeEventListener('click', closeHandler);
-            };
-            closeBtn.addEventListener('click', closeHandler);
-        }
+        const rulesContent = `
+            <div class="rules-section">
+                <h3>Game Rules</h3>
+                <ul>
+                    <li>Fill the grid with suns (☀️) and moons (🌑)</li>
+                    <li>Each row and column must have exactly 3 of each symbol</li>
+                    <li>No more than 2 consecutive identical symbols</li>
+                    <li>Follow constraint symbols: <strong>=</strong> (same) and <strong>×</strong> (different)</li>
+                </ul>
+            </div>
+            <div class="rules-section">
+                <h3>Error Highlight Colors</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-color red"></div>
+                        <span>Red: 3+ consecutive symbols or too many in row/column</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color purple"></div>
+                        <span>Purple: Constraint violations (= or × rules broken)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color orange"></div>
+                        <span>Orange: Balance violations (more than 3 of same type)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="rules-section">
+                <h3>Keyboard Shortcuts</h3>
+                <ul>
+                    <li><kbd>Ctrl+N</kbd> - New Game</li>
+                    <li><kbd>Ctrl+H</kbd> - Show Hint</li>
+                    <li><kbd>Ctrl+Z</kbd> - Undo</li>
+                    <li><kbd>Ctrl+R</kbd> - Clear Grid</li>
+                    <li><kbd>?</kbd> - Show Rules</li>
+                    <li><kbd>Esc</kbd> - Close Modal</li>
+                </ul>
+            </div>
+        `;
+        
+        document.getElementById('rules-title').textContent = 'Logiq Rules';
+        document.getElementById('rules-content').innerHTML = rulesContent;
+        document.getElementById('rules-modal').style.display = 'block';
     }
 
     newGame() {
