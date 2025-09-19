@@ -320,145 +320,9 @@ class TangoGame {
         const violationTypes = new Map();
 
         console.log('=== SIMPLE VALIDATION ===');
-
-        // 1. CHECK EACH ROW - if more than 3 of same symbol, highlight ALL of them
-        for (let row = 0; row < this.gridSize; row++) {
-            const suns = [];
-            const moons = [];
-            
-            // Collect positions of suns and moons
-            for (let col = 0; col < this.gridSize; col++) {
-                if (this.grid[row][col] === '☀️') suns.push([row, col]);
-                if (this.grid[row][col] === '🌑') moons.push([row, col]);
-            }
-            
-            // If more than 3 suns, highlight ALL of them (they're all breaking the rule)
-            if (suns.length > 3) {
-                console.log(`Row ${row}: ${suns.length} suns - highlighting ALL`);
-                for (let i = 0; i < suns.length; i++) {
-                    const key = `${suns[i][0]},${suns[i][1]}`;
-                    invalidCells.add(key);
-                    violationTypes.set(key, 'row-balance');
-                }
-            }
-            
-            // If more than 3 moons, highlight ALL of them (they're all breaking the rule)
-            if (moons.length > 3) {
-                console.log(`Row ${row}: ${moons.length} moons - highlighting ALL`);
-                for (let i = 0; i < moons.length; i++) {
-                    const key = `${moons[i][0]},${moons[i][1]}`;
-                    invalidCells.add(key);
-                    violationTypes.set(key, 'row-balance');
-                }
-            }
-        }
-
-        // 2. CHECK EACH COLUMN - if more than 3 of same symbol, highlight ALL of them
-        for (let col = 0; col < this.gridSize; col++) {
-            const suns = [];
-            const moons = [];
-            
-            // Collect positions of suns and moons
-            for (let row = 0; row < this.gridSize; row++) {
-                if (this.grid[row][col] === '☀️') suns.push([row, col]);
-                if (this.grid[row][col] === '🌑') moons.push([row, col]);
-            }
-            
-            // If more than 3 suns, highlight ALL of them (they're all breaking the rule)
-            if (suns.length > 3) {
-                console.log(`Column ${col}: ${suns.length} suns - highlighting ALL`);
-                for (let i = 0; i < suns.length; i++) {
-                    const key = `${suns[i][0]},${suns[i][1]}`;
-                    invalidCells.add(key);
-                    violationTypes.set(key, 'column-balance');
-                }
-            }
-            
-            // If more than 3 moons, highlight ALL of them (they're all breaking the rule)
-            if (moons.length > 3) {
-                console.log(`Column ${col}: ${moons.length} moons - highlighting ALL`);
-                for (let i = 0; i < moons.length; i++) {
-                    const key = `${moons[i][0]},${moons[i][1]}`;
-                    invalidCells.add(key);
-                    violationTypes.set(key, 'column-balance');
-                }
-            }
-        }
-
-        // 3. CHECK FOR 3+ CONSECUTIVE - horizontal
-        for (let row = 0; row < this.gridSize; row++) {
-            for (let col = 0; col <= this.gridSize - 3; col++) {
-                const cell1 = this.grid[row][col];
-                const cell2 = this.grid[row][col + 1];
-                const cell3 = this.grid[row][col + 2];
-                
-                if (cell1 && cell1 === cell2 && cell2 === cell3) {
-                    console.log(`3+ consecutive horizontal at row ${row}, cols ${col}-${col+2}`);
-                    for (let c = col; c <= col + 2; c++) {
-                        const key = `${row},${c}`;
-                        invalidCells.add(key);
-                        violationTypes.set(key, 'consecutive-horizontal');
-                    }
-                    
-                    // Check for 4th consecutive
-                    if (col + 3 < this.gridSize && this.grid[row][col + 3] === cell1) {
-                        const key = `${row},${col + 3}`;
-                        invalidCells.add(key);
-                        violationTypes.set(key, 'consecutive-horizontal');
-                    }
-                }
-            }
-        }
-
-        // 4. CHECK FOR 3+ CONSECUTIVE - vertical
-        for (let col = 0; col < this.gridSize; col++) {
-            for (let row = 0; row <= this.gridSize - 3; row++) {
-                const cell1 = this.grid[row][col];
-                const cell2 = this.grid[row + 1][col];
-                const cell3 = this.grid[row + 2][col];
-                
-                if (cell1 && cell1 === cell2 && cell2 === cell3) {
-                    console.log(`3+ consecutive vertical at col ${col}, rows ${row}-${row+2}`);
-                    for (let r = row; r <= row + 2; r++) {
-                        const key = `${r},${col}`;
-                        invalidCells.add(key);
-                        violationTypes.set(key, 'consecutive-vertical');
-                    }
-                    
-                    // Check for 4th consecutive
-                    if (row + 3 < this.gridSize && this.grid[row + 3][col] === cell1) {
-                        const key = `${row + 3},${col}`;
-                        invalidCells.add(key);
-                        violationTypes.set(key, 'consecutive-vertical');
-                    }
-                }
-            }
-        }
-
-        // 5. CHECK CONSTRAINTS
-        for (const constraint of this.constraints) {
-            const [r1, c1] = constraint.cell1;
-            const [r2, c2] = constraint.cell2;
-            const val1 = this.grid[r1][c1];
-            const val2 = this.grid[r2][c2];
-            
-            if (val1 && val2) {
-                if (constraint.type === '=' && val1 !== val2) {
-                    console.log(`Constraint violation: = between different symbols`);
-                    invalidCells.add(`${r1},${c1}`);
-                    invalidCells.add(`${r2},${c2}`);
-                    violationTypes.set(`${r1},${c1}`, 'constraint');
-                    violationTypes.set(`${r2},${c2}`, 'constraint');
-                }
-                if (constraint.type === '×' && val1 === val2) {
-                    console.log(`Constraint violation: × between same symbols`);
-                    invalidCells.add(`${r1},${c1}`);
-                    invalidCells.add(`${r2},${c2}`);
-                    violationTypes.set(`${r1},${c1}`, 'constraint');
-                    violationTypes.set(`${r2},${c2}`, 'constraint');
-                }
-            }
-        }
+        
+        // Use the shared validation logic
+        this.runValidationCheck(invalidCells, violationTypes);
 
         console.log('Total invalid cells:', invalidCells.size);
         this.highlightInvalidCells(Array.from(invalidCells), violationTypes);
@@ -522,36 +386,171 @@ class TangoGame {
     checkWinCondition() {
         // Check if grid is complete
         const complete = this.grid.every(row => row.every(cell => cell !== null));
-        if (!complete) return;
-
-        // Check if solution matches
-        let isCorrect = true;
-        for (let i = 0; i < this.gridSize; i++) {
-            for (let j = 0; j < this.gridSize; j++) {
-                if (this.grid[i][j] !== this.solution[i][j]) {
-                    isCorrect = false;
-                    break;
-                }
-            }
-            if (!isCorrect) break;
+        if (!complete) {
+            console.log('Grid not complete yet');
+            return;
         }
 
-        if (isCorrect) {
-            clearInterval(this.timerInterval);
-            const timeTaken = Math.floor((new Date() - this.startTime) / 1000);
-            const timeString = this.formatTime(timeTaken);
+        // Check if there are any validation errors
+        const invalidCells = new Set();
+        const violationTypes = new Map();
+        
+        // Run validation logic to check for errors
+        this.runValidationCheck(invalidCells, violationTypes);
+        
+        if (invalidCells.size > 0) {
+            console.log('Grid has validation errors, cannot win yet:', Array.from(invalidCells));
+            return;
+        }
+
+        // If no validation errors, the puzzle is solved!
+        clearInterval(this.timerInterval);
+        const timeTaken = Math.floor((new Date() - this.startTime) / 1000);
+        const timeString = this.formatTime(timeTaken);
+        
+        // Clear highlights when puzzle is solved
+        this.clearInvalidHighlights();
+        
+        // Save stats
+        this.stats.recordWin(timeTaken, this.difficulty);
+        
+        setTimeout(() => {
+            if (confirm(`🎉 Fantastic job! You solved the puzzle in ${timeString}! Would you like to start a new game?`)) {
+                this.newGame();
+            }
+        }, 100);
+    }
+
+    runValidationCheck(invalidCells, violationTypes) {
+        // 1. CHECK EACH ROW - if more than 3 of same symbol, highlight ALL of them
+        for (let row = 0; row < this.gridSize; row++) {
+            const suns = [];
+            const moons = [];
             
-            // Clear highlights when puzzle is solved
-            this.clearInvalidHighlights();
+            // Collect positions of suns and moons
+            for (let col = 0; col < this.gridSize; col++) {
+                if (this.grid[row][col] === '☀️') suns.push([row, col]);
+                if (this.grid[row][col] === '🌑') moons.push([row, col]);
+            }
             
-            // Save stats
-            this.stats.recordWin(timeTaken, this.difficulty);
-            
-            setTimeout(() => {
-                if (confirm(`🎉 Fantastic job! You solved the puzzle in ${timeString}! Would you like to start a new game?`)) {
-                    this.newGame();
+            // If more than 3 suns, highlight ALL of them
+            if (suns.length > 3) {
+                for (let i = 0; i < suns.length; i++) {
+                    const key = `${suns[i][0]},${suns[i][1]}`;
+                    invalidCells.add(key);
+                    violationTypes.set(key, 'row-balance');
                 }
-            }, 100);
+            }
+            
+            // If more than 3 moons, highlight ALL of them
+            if (moons.length > 3) {
+                for (let i = 0; i < moons.length; i++) {
+                    const key = `${moons[i][0]},${moons[i][1]}`;
+                    invalidCells.add(key);
+                    violationTypes.set(key, 'row-balance');
+                }
+            }
+        }
+
+        // 2. CHECK EACH COLUMN - if more than 3 of same symbol, highlight ALL of them
+        for (let col = 0; col < this.gridSize; col++) {
+            const suns = [];
+            const moons = [];
+            
+            // Collect positions of suns and moons
+            for (let row = 0; row < this.gridSize; row++) {
+                if (this.grid[row][col] === '☀️') suns.push([row, col]);
+                if (this.grid[row][col] === '🌑') moons.push([row, col]);
+            }
+            
+            // If more than 3 suns, highlight ALL of them
+            if (suns.length > 3) {
+                for (let i = 0; i < suns.length; i++) {
+                    const key = `${suns[i][0]},${suns[i][1]}`;
+                    invalidCells.add(key);
+                    violationTypes.set(key, 'column-balance');
+                }
+            }
+            
+            // If more than 3 moons, highlight ALL of them
+            if (moons.length > 3) {
+                for (let i = 0; i < moons.length; i++) {
+                    const key = `${moons[i][0]},${moons[i][1]}`;
+                    invalidCells.add(key);
+                    violationTypes.set(key, 'column-balance');
+                }
+            }
+        }
+
+        // 3. CHECK FOR 3+ CONSECUTIVE - horizontal
+        for (let row = 0; row < this.gridSize; row++) {
+            for (let col = 0; col <= this.gridSize - 3; col++) {
+                const cell1 = this.grid[row][col];
+                const cell2 = this.grid[row][col + 1];
+                const cell3 = this.grid[row][col + 2];
+                
+                if (cell1 && cell1 === cell2 && cell2 === cell3) {
+                    for (let c = col; c <= col + 2; c++) {
+                        const key = `${row},${c}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-horizontal');
+                    }
+                    
+                    // Check for 4th consecutive
+                    if (col + 3 < this.gridSize && this.grid[row][col + 3] === cell1) {
+                        const key = `${row},${col + 3}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-horizontal');
+                    }
+                }
+            }
+        }
+
+        // 4. CHECK FOR 3+ CONSECUTIVE - vertical
+        for (let col = 0; col < this.gridSize; col++) {
+            for (let row = 0; row <= this.gridSize - 3; row++) {
+                const cell1 = this.grid[row][col];
+                const cell2 = this.grid[row + 1][col];
+                const cell3 = this.grid[row + 2][col];
+                
+                if (cell1 && cell1 === cell2 && cell2 === cell3) {
+                    for (let r = row; r <= row + 2; r++) {
+                        const key = `${r},${col}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-vertical');
+                    }
+                    
+                    // Check for 4th consecutive
+                    if (row + 3 < this.gridSize && this.grid[row + 3][col] === cell1) {
+                        const key = `${row + 3},${col}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-vertical');
+                    }
+                }
+            }
+        }
+
+        // 5. CHECK CONSTRAINTS
+        for (const constraint of this.constraints) {
+            const [r1, c1] = constraint.cell1;
+            const [r2, c2] = constraint.cell2;
+            const val1 = this.grid[r1][c1];
+            const val2 = this.grid[r2][c2];
+            
+            if (val1 && val2) {
+                if (constraint.type === '=' && val1 !== val2) {
+                    invalidCells.add(`${r1},${c1}`);
+                    invalidCells.add(`${r2},${c2}`);
+                    violationTypes.set(`${r1},${c1}`, 'constraint');
+                    violationTypes.set(`${r2},${c2}`, 'constraint');
+                }
+                if (constraint.type === '×' && val1 === val2) {
+                    invalidCells.add(`${r1},${c1}`);
+                    invalidCells.add(`${r2},${c2}`);
+                    violationTypes.set(`${r1},${c1}`, 'constraint');
+                    violationTypes.set(`${r2},${c2}`, 'constraint');
+                }
+            }
         }
     }
 
