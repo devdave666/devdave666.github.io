@@ -319,17 +319,27 @@ class TangoGame {
 
     validateAndHighlightErrors() {
         const invalidCells = new Set();
-        const violationTypes = new Map(); // Track what type of violation each cell has
+        const violationTypes = new Map();
 
-        // 1. Check for three consecutive symbols horizontally
+        // Debug: Log current grid state
+        console.log('Current grid state:');
+        for (let i = 0; i < this.gridSize; i++) {
+            console.log(`Row ${i}:`, this.grid[i]);
+        }
+
+        // 1. COMPREHENSIVE three consecutive check - horizontal
         for (let row = 0; row < this.gridSize; row++) {
             for (let col = 0; col <= this.gridSize - 3; col++) {
                 const cell1 = this.grid[row][col];
                 const cell2 = this.grid[row][col + 1];
                 const cell3 = this.grid[row][col + 2];
                 
-                if (cell1 && cell2 && cell3 && cell1 === cell2 && cell2 === cell3) {
-                    // Mark all three cells as invalid
+                // Check if all three cells have values and are the same
+                if (cell1 && cell2 && cell3 && 
+                    cell1 === cell2 && cell2 === cell3) {
+                    console.log(`Found horizontal violation at row ${row}, cols ${col}-${col+2}: ${cell1}`);
+                    
+                    // Mark ALL three cells as invalid
                     for (let c = col; c <= col + 2; c++) {
                         const key = `${row},${c}`;
                         invalidCells.add(key);
@@ -339,15 +349,19 @@ class TangoGame {
             }
         }
 
-        // 2. Check for three consecutive symbols vertically
+        // 2. COMPREHENSIVE three consecutive check - vertical
         for (let col = 0; col < this.gridSize; col++) {
             for (let row = 0; row <= this.gridSize - 3; row++) {
                 const cell1 = this.grid[row][col];
                 const cell2 = this.grid[row + 1][col];
                 const cell3 = this.grid[row + 2][col];
                 
-                if (cell1 && cell2 && cell3 && cell1 === cell2 && cell2 === cell3) {
-                    // Mark all three cells as invalid
+                // Check if all three cells have values and are the same
+                if (cell1 && cell2 && cell3 && 
+                    cell1 === cell2 && cell2 === cell3) {
+                    console.log(`Found vertical violation at col ${col}, rows ${row}-${row+2}: ${cell1}`);
+                    
+                    // Mark ALL three cells as invalid
                     for (let r = row; r <= row + 2; r++) {
                         const key = `${r},${col}`;
                         invalidCells.add(key);
@@ -357,12 +371,55 @@ class TangoGame {
             }
         }
 
-        // 3. Check row/column balance violations
+        // 3. Check for overlapping consecutive violations (4+ in a row)
+        // This catches cases where we have 4+ consecutive symbols
+        for (let row = 0; row < this.gridSize; row++) {
+            for (let col = 0; col <= this.gridSize - 4; col++) {
+                const cells = [
+                    this.grid[row][col],
+                    this.grid[row][col + 1],
+                    this.grid[row][col + 2],
+                    this.grid[row][col + 3]
+                ];
+                
+                if (cells.every(cell => cell && cell === cells[0])) {
+                    console.log(`Found 4+ horizontal violation at row ${row}, cols ${col}-${col+3}`);
+                    for (let c = col; c <= col + 3; c++) {
+                        const key = `${row},${c}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-horizontal');
+                    }
+                }
+            }
+        }
+
+        for (let col = 0; col < this.gridSize; col++) {
+            for (let row = 0; row <= this.gridSize - 4; row++) {
+                const cells = [
+                    this.grid[row][col],
+                    this.grid[row + 1][col],
+                    this.grid[row + 2][col],
+                    this.grid[row + 3][col]
+                ];
+                
+                if (cells.every(cell => cell && cell === cells[0])) {
+                    console.log(`Found 4+ vertical violation at col ${col}, rows ${row}-${row+3}`);
+                    for (let r = row; r <= row + 3; r++) {
+                        const key = `${r},${col}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-vertical');
+                    }
+                }
+            }
+        }
+
+        // 4. Row/column balance violations
         for (let i = 0; i < this.gridSize; i++) {
             // Check row balance
             const rowSuns = this.grid[i].filter(c => c === '☀️').length;
             const rowMoons = this.grid[i].filter(c => c === '🌑').length;
             if (rowSuns > this.gridSize/2 || rowMoons > this.gridSize/2) {
+                console.log(`Row ${i} balance violation: ${rowSuns} suns, ${rowMoons} moons`);
                 for (let j = 0; j < this.gridSize; j++) {
                     if (this.grid[i][j]) {
                         const key = `${i},${j}`;
@@ -376,6 +433,7 @@ class TangoGame {
             const colSuns = this.grid.map(row => row[i]).filter(c => c === '☀️').length;
             const colMoons = this.grid.map(row => row[i]).filter(c => c === '🌑').length;
             if (colSuns > this.gridSize/2 || colMoons > this.gridSize/2) {
+                console.log(`Column ${i} balance violation: ${colSuns} suns, ${colMoons} moons`);
                 for (let j = 0; j < this.gridSize; j++) {
                     if (this.grid[j][i]) {
                         const key = `${j},${i}`;
@@ -386,7 +444,7 @@ class TangoGame {
             }
         }
 
-        // 4. Check constraint violations
+        // 5. Constraint violations
         for (const constraint of this.constraints) {
             const [r1, c1] = constraint.cell1;
             const [r2, c2] = constraint.cell2;
@@ -403,6 +461,7 @@ class TangoGame {
                 }
                 
                 if (isViolation) {
+                    console.log(`Constraint violation: ${constraint.type} between (${r1},${c1}) and (${r2},${c2})`);
                     const key1 = `${r1},${c1}`;
                     const key2 = `${r2},${c2}`;
                     invalidCells.add(key1);
@@ -413,14 +472,16 @@ class TangoGame {
             }
         }
 
-        // 5. Apply highlights with staggered animation
+        console.log('Invalid cells found:', Array.from(invalidCells));
+
+        // 6. Apply highlights immediately (no staggering to reduce lag)
         this.highlightInvalidCells(Array.from(invalidCells), violationTypes);
 
-        // 6. Auto-remove highlights after 3 seconds
+        // 7. Auto-remove highlights after 4 seconds
         if (invalidCells.size > 0) {
             setTimeout(() => {
                 this.clearInvalidHighlights();
-            }, 3000);
+            }, 4000);
         }
     }
 
@@ -428,32 +489,22 @@ class TangoGame {
         // Clear existing highlights first
         this.clearInvalidHighlights();
         
-        // Add highlights with staggered timing for better visual effect
-        invalidCellKeys.forEach((cellKey, index) => {
-            setTimeout(() => {
-                const [row, col] = cellKey.split(',').map(Number);
-                const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+        // Add highlights immediately (no staggering to reduce lag)
+        invalidCellKeys.forEach((cellKey) => {
+            const [row, col] = cellKey.split(',').map(Number);
+            const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+            
+            if (cell && !this.fixedCells.has(cellKey)) {
+                const violationType = violationTypes.get(cellKey);
+                cell.classList.add('invalid');
                 
-                if (cell && !this.fixedCells.has(cellKey)) {
-                    const violationType = violationTypes.get(cellKey);
-                    cell.classList.add('invalid');
-                    
-                    // Add specific violation type class for different animations
-                    if (violationType) {
-                        cell.classList.add(`invalid-${violationType}`);
-                    }
-                    
-                    // Add a subtle shake effect
-                    cell.style.animation = 'invalidShake 0.5s ease-in-out';
-                    
-                    // Remove the shake animation after it completes
-                    setTimeout(() => {
-                        if (cell.style.animation === 'invalidShake 0.5s ease-in-out') {
-                            cell.style.animation = '';
-                        }
-                    }, 500);
+                // Add specific violation type class for different animations
+                if (violationType) {
+                    cell.classList.add(`invalid-${violationType}`);
                 }
-            }, index * 50); // Stagger by 50ms per cell
+                
+                console.log(`Highlighting cell (${row},${col}) with type: ${violationType}`);
+            }
         });
     }
 
