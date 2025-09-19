@@ -405,46 +405,86 @@ class TangoGame {
             }
         }
 
-        // 4. Row/column balance violations - FIXED LOGIC
+        // 4. Row/column balance violations - ONLY HIGHLIGHT RULE-BREAKING CELLS
         for (let i = 0; i < this.gridSize; i++) {
-            // Check row balance - count filled cells only
-            const rowCells = this.grid[i].filter(c => c !== null);
+            // Check row balance
             const rowSuns = this.grid[i].filter(c => c === '☀️').length;
             const rowMoons = this.grid[i].filter(c => c === '🌑').length;
             
-            // If row is complete (6 cells) and imbalanced, OR if we already have too many of one type
-            const isRowImbalanced = (rowCells.length === this.gridSize && (rowSuns !== this.gridSize/2 || rowMoons !== this.gridSize/2)) ||
-                                   (rowSuns > this.gridSize/2) || (rowMoons > this.gridSize/2);
-            
-            if (isRowImbalanced) {
-                console.log(`Row ${i} balance violation: ${rowSuns} suns, ${rowMoons} moons (total filled: ${rowCells.length})`);
-                // Highlight ALL filled cells in this row because they're all part of the imbalance
+            // Only highlight cells that are EXCEEDING the limit (more than 3)
+            if (rowSuns > this.gridSize/2) {
+                console.log(`Row ${i} has TOO MANY SUNS: ${rowSuns} suns (max allowed: 3)`);
+                // Highlight ONLY the excess suns (the ones breaking the rule)
+                let sunCount = 0;
                 for (let j = 0; j < this.gridSize; j++) {
-                    if (this.grid[i][j]) {
-                        const key = `${i},${j}`;
-                        invalidCells.add(key);
-                        violationTypes.set(key, 'row-balance');
+                    if (this.grid[i][j] === '☀️') {
+                        sunCount++;
+                        // Highlight suns beyond the 3rd one (the rule-breakers)
+                        if (sunCount > this.gridSize/2) {
+                            const key = `${i},${j}`;
+                            invalidCells.add(key);
+                            violationTypes.set(key, 'row-balance');
+                            console.log(`  Highlighting excess sun at (${i},${j}) - sun #${sunCount}`);
+                        }
+                    }
+                }
+            }
+            
+            if (rowMoons > this.gridSize/2) {
+                console.log(`Row ${i} has TOO MANY MOONS: ${rowMoons} moons (max allowed: 3)`);
+                // Highlight ONLY the excess moons (the ones breaking the rule)
+                let moonCount = 0;
+                for (let j = 0; j < this.gridSize; j++) {
+                    if (this.grid[i][j] === '🌑') {
+                        moonCount++;
+                        // Highlight moons beyond the 3rd one (the rule-breakers)
+                        if (moonCount > this.gridSize/2) {
+                            const key = `${i},${j}`;
+                            invalidCells.add(key);
+                            violationTypes.set(key, 'row-balance');
+                            console.log(`  Highlighting excess moon at (${i},${j}) - moon #${moonCount}`);
+                        }
                     }
                 }
             }
 
-            // Check column balance - count filled cells only
-            const colCells = this.grid.map(row => row[i]).filter(c => c !== null);
+            // Check column balance
             const colSuns = this.grid.map(row => row[i]).filter(c => c === '☀️').length;
             const colMoons = this.grid.map(row => row[i]).filter(c => c === '🌑').length;
             
-            // If column is complete (6 cells) and imbalanced, OR if we already have too many of one type
-            const isColImbalanced = (colCells.length === this.gridSize && (colSuns !== this.gridSize/2 || colMoons !== this.gridSize/2)) ||
-                                   (colSuns > this.gridSize/2) || (colMoons > this.gridSize/2);
-            
-            if (isColImbalanced) {
-                console.log(`Column ${i} balance violation: ${colSuns} suns, ${colMoons} moons (total filled: ${colCells.length})`);
-                // Highlight ALL filled cells in this column because they're all part of the imbalance
+            // Only highlight cells that are EXCEEDING the limit (more than 3)
+            if (colSuns > this.gridSize/2) {
+                console.log(`Column ${i} has TOO MANY SUNS: ${colSuns} suns (max allowed: 3)`);
+                // Highlight ONLY the excess suns (the ones breaking the rule)
+                let sunCount = 0;
                 for (let j = 0; j < this.gridSize; j++) {
-                    if (this.grid[j][i]) {
-                        const key = `${j},${i}`;
-                        invalidCells.add(key);
-                        violationTypes.set(key, 'column-balance');
+                    if (this.grid[j][i] === '☀️') {
+                        sunCount++;
+                        // Highlight suns beyond the 3rd one (the rule-breakers)
+                        if (sunCount > this.gridSize/2) {
+                            const key = `${j},${i}`;
+                            invalidCells.add(key);
+                            violationTypes.set(key, 'column-balance');
+                            console.log(`  Highlighting excess sun at (${j},${i}) - sun #${sunCount}`);
+                        }
+                    }
+                }
+            }
+            
+            if (colMoons > this.gridSize/2) {
+                console.log(`Column ${i} has TOO MANY MOONS: ${colMoons} moons (max allowed: 3)`);
+                // Highlight ONLY the excess moons (the ones breaking the rule)
+                let moonCount = 0;
+                for (let j = 0; j < this.gridSize; j++) {
+                    if (this.grid[j][i] === '🌑') {
+                        moonCount++;
+                        // Highlight moons beyond the 3rd one (the rule-breakers)
+                        if (moonCount > this.gridSize/2) {
+                            const key = `${j},${i}`;
+                            invalidCells.add(key);
+                            violationTypes.set(key, 'column-balance');
+                            console.log(`  Highlighting excess moon at (${j},${i}) - moon #${moonCount}`);
+                        }
                     }
                 }
             }
