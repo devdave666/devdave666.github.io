@@ -133,8 +133,10 @@ class TangoGame {
         this.grid[row][col] = newValue;
         this.updateCell(row, col);
 
-        // Immediately revalidate to update highlights
-        this.validateAndHighlightErrors();
+        // Add delay before validation to let user cycle through symbols
+        setTimeout(() => {
+            this.validateAndHighlightErrors();
+        }, 500);
 
         this.checkWinCondition();
     }
