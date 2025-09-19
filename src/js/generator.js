@@ -6,22 +6,77 @@ export class PuzzleGenerator {
     }
 
     generatePuzzle(difficulty = 'medium') {
-        const maxAttempts = 50;
+        let attempt = 0;
         
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        while (true) {
+            attempt++;
             const solution = this.generateValidSolution();
             const puzzle = this.createUniquePuzzle(solution, difficulty);
             
             if (puzzle && this.hasUniqueSolution(puzzle)) {
-                console.log(`Generated unique puzzle on attempt ${attempt + 1}`);
+                console.log(`Generated unique puzzle on attempt ${attempt}`);
                 return puzzle;
             }
+            
+            // Log progress every 10 attempts
+            if (attempt % 10 === 0) {
+                console.log(`Still searching for unique puzzle... attempt ${attempt}`);
+            }
+            
+            // If we're taking too long, try with more constraints/cells
+            if (attempt > 50) {
+                console.log('Switching to more conservative generation parameters');
+                return this.generateConservativePuzzle(difficulty);
+            }
         }
-        
-        // Fallback: return a puzzle even if we can't guarantee uniqueness
-        console.warn('Could not generate unique puzzle, using fallback');
-        const solution = this.generateValidSolution();
-        return this.createUniquePuzzle(solution, difficulty);
+    }
+
+    generateConservativePuzzle(difficulty) {
+        // More aggressive parameters to guarantee uniqueness
+        const conservativeSettings = {
+            easy: { minCells: 12, maxCells: 16, minConstraints: 8, maxConstraints: 12 },
+            medium: { minCells: 10, maxCells: 14, minConstraints: 10, maxConstraints: 14 },
+            hard: { minCells: 8, maxCells: 12, minConstraints: 12, maxConstraints: 16 }
+        };
+
+        let attempt = 0;
+        while (true) {
+            attempt++;
+            const solution = this.generateValidSolution();
+            const puzzle = this.createUniquePuzzleWithSettings(solution, conservativeSettings[difficulty] || conservativeSettings.medium);
+            
+            if (puzzle && this.hasUniqueSolution(puzzle)) {
+                console.log(`Generated conservative unique puzzle on attempt ${attempt}`);
+                return puzzle;
+            }
+            
+            if (attempt % 5 === 0) {
+                console.log(`Conservative generation attempt ${attempt}`);
+            }
+        }
+    }
+
+    createUniquePuzzleWithSettings(solution, settings) {
+        const puzzle = {
+            predefinedCells: [],
+            constraints: [],
+            solution: solution
+        };
+
+        // Use provided settings
+        const cellCount = settings.minCells + Math.floor(Math.random() * (settings.maxCells - settings.minCells + 1));
+        const positions = this.getRandomPositions(cellCount);
+        positions.forEach(([row, col]) => {
+            puzzle.predefinedCells.push({
+                row, col, value: solution[row][col]
+            });
+        });
+
+        // Add constraints that help ensure uniqueness
+        const constraintCount = settings.minConstraints + Math.floor(Math.random() * (settings.maxConstraints - settings.minConstraints + 1));
+        puzzle.constraints = this.generateConstraintsForUniqueness(solution, constraintCount);
+
+        return puzzle;
     }
 
     createUniquePuzzle(solution, difficulty) {

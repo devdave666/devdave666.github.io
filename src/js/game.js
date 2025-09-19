@@ -50,25 +50,45 @@ class TangoGame {
     }
 
     initializePuzzle() {
-        const puzzle = this.generator.generatePuzzle(this.difficulty);
-        this.solution = puzzle.solution;
+        // Show loading indicator
+        this.showLoadingIndicator();
         
-        // Clear existing grid
-        this.grid = Array(this.gridSize).fill(null)
-            .map(() => Array(this.gridSize).fill(null));
-        this.fixedCells.clear();
-        
-        // Set initial cells
-        puzzle.predefinedCells.forEach(({row, col, value}) => {
-            this.grid[row][col] = value;
-            this.fixedCells.add(`${row},${col}`);
-        });
+        // Use setTimeout to allow UI to update before heavy computation
+        setTimeout(() => {
+            const puzzle = this.generator.generatePuzzle(this.difficulty);
+            this.solution = puzzle.solution;
+            
+            // Clear existing grid
+            this.grid = Array(this.gridSize).fill(null)
+                .map(() => Array(this.gridSize).fill(null));
+            this.fixedCells.clear();
+            
+            // Set initial cells
+            puzzle.predefinedCells.forEach(({row, col, value}) => {
+                this.grid[row][col] = value;
+                this.fixedCells.add(`${row},${col}`);
+            });
 
-        // Set constraints
-        this.constraints = puzzle.constraints;
-        this.setupGame(); // Rebuild grid with new constraints
-        this.clearInvalidHighlights(); // Clear any existing highlights
-        this.initTimer(); // Reset timer for new game
+            // Set constraints
+            this.constraints = puzzle.constraints;
+            this.setupGame(); // Rebuild grid with new constraints
+            this.clearInvalidHighlights(); // Clear any existing highlights
+            this.initTimer(); // Reset timer for new game
+            
+            // Hide loading indicator
+            this.hideLoadingIndicator();
+        }, 10);
+    }
+
+    showLoadingIndicator() {
+        const gameGrid = document.getElementById('game-grid');
+        if (gameGrid) {
+            gameGrid.innerHTML = '<div class="loading-indicator">Generating unique puzzle...</div>';
+        }
+    }
+
+    hideLoadingIndicator() {
+        // Loading indicator will be replaced by setupGame()
     }
 
     setupGame() {
