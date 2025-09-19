@@ -319,88 +319,100 @@ class TangoGame {
             console.log(`Row ${i}:`, this.grid[i]);
         }
 
-        // 1. COMPREHENSIVE three consecutive check - horizontal
+        // 1. COMPREHENSIVE consecutive symbols detection - horizontal
         for (let row = 0; row < this.gridSize; row++) {
-            for (let col = 0; col <= this.gridSize - 3; col++) {
-                const cell1 = this.grid[row][col];
-                const cell2 = this.grid[row][col + 1];
-                const cell3 = this.grid[row][col + 2];
+            // Find all consecutive sequences in this row
+            let currentSymbol = null;
+            let consecutiveCount = 0;
+            let consecutiveStart = -1;
+            
+            for (let col = 0; col < this.gridSize; col++) {
+                const cell = this.grid[row][col];
                 
-                // Check if all three cells have values and are the same
-                if (cell1 && cell2 && cell3 && 
-                    cell1 === cell2 && cell2 === cell3) {
-                    console.log(`Found horizontal violation at row ${row}, cols ${col}-${col+2}: ${cell1}`);
+                if (cell && cell === currentSymbol) {
+                    // Continue the sequence
+                    consecutiveCount++;
+                } else {
+                    // Check if previous sequence was a violation (3+ consecutive)
+                    if (consecutiveCount >= 3) {
+                        console.log(`Found horizontal violation at row ${row}, cols ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
+                        // Highlight ALL cells in the consecutive sequence
+                        for (let c = consecutiveStart; c < consecutiveStart + consecutiveCount; c++) {
+                            const key = `${row},${c}`;
+                            invalidCells.add(key);
+                            violationTypes.set(key, 'consecutive-horizontal');
+                        }
+                    }
                     
-                    // Mark ALL three cells as invalid
-                    for (let c = col; c <= col + 2; c++) {
-                        const key = `${row},${c}`;
-                        invalidCells.add(key);
-                        violationTypes.set(key, 'consecutive-horizontal');
+                    // Start new sequence
+                    if (cell) {
+                        currentSymbol = cell;
+                        consecutiveCount = 1;
+                        consecutiveStart = col;
+                    } else {
+                        currentSymbol = null;
+                        consecutiveCount = 0;
+                        consecutiveStart = -1;
                     }
+                }
+            }
+            
+            // Check final sequence at end of row
+            if (consecutiveCount >= 3) {
+                console.log(`Found horizontal violation at row ${row}, cols ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
+                for (let c = consecutiveStart; c < consecutiveStart + consecutiveCount; c++) {
+                    const key = `${row},${c}`;
+                    invalidCells.add(key);
+                    violationTypes.set(key, 'consecutive-horizontal');
                 }
             }
         }
 
-        // 2. COMPREHENSIVE three consecutive check - vertical
+        // 2. COMPREHENSIVE consecutive symbols detection - vertical
         for (let col = 0; col < this.gridSize; col++) {
-            for (let row = 0; row <= this.gridSize - 3; row++) {
-                const cell1 = this.grid[row][col];
-                const cell2 = this.grid[row + 1][col];
-                const cell3 = this.grid[row + 2][col];
+            // Find all consecutive sequences in this column
+            let currentSymbol = null;
+            let consecutiveCount = 0;
+            let consecutiveStart = -1;
+            
+            for (let row = 0; row < this.gridSize; row++) {
+                const cell = this.grid[row][col];
                 
-                // Check if all three cells have values and are the same
-                if (cell1 && cell2 && cell3 && 
-                    cell1 === cell2 && cell2 === cell3) {
-                    console.log(`Found vertical violation at col ${col}, rows ${row}-${row+2}: ${cell1}`);
+                if (cell && cell === currentSymbol) {
+                    // Continue the sequence
+                    consecutiveCount++;
+                } else {
+                    // Check if previous sequence was a violation (3+ consecutive)
+                    if (consecutiveCount >= 3) {
+                        console.log(`Found vertical violation at col ${col}, rows ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
+                        // Highlight ALL cells in the consecutive sequence
+                        for (let r = consecutiveStart; r < consecutiveStart + consecutiveCount; r++) {
+                            const key = `${r},${col}`;
+                            invalidCells.add(key);
+                            violationTypes.set(key, 'consecutive-vertical');
+                        }
+                    }
                     
-                    // Mark ALL three cells as invalid
-                    for (let r = row; r <= row + 2; r++) {
-                        const key = `${r},${col}`;
-                        invalidCells.add(key);
-                        violationTypes.set(key, 'consecutive-vertical');
+                    // Start new sequence
+                    if (cell) {
+                        currentSymbol = cell;
+                        consecutiveCount = 1;
+                        consecutiveStart = row;
+                    } else {
+                        currentSymbol = null;
+                        consecutiveCount = 0;
+                        consecutiveStart = -1;
                     }
                 }
             }
-        }
-
-        // 3. Check for overlapping consecutive violations (4+ in a row)
-        // This catches cases where we have 4+ consecutive symbols
-        for (let row = 0; row < this.gridSize; row++) {
-            for (let col = 0; col <= this.gridSize - 4; col++) {
-                const cells = [
-                    this.grid[row][col],
-                    this.grid[row][col + 1],
-                    this.grid[row][col + 2],
-                    this.grid[row][col + 3]
-                ];
-                
-                if (cells.every(cell => cell && cell === cells[0])) {
-                    console.log(`Found 4+ horizontal violation at row ${row}, cols ${col}-${col+3}`);
-                    for (let c = col; c <= col + 3; c++) {
-                        const key = `${row},${c}`;
-                        invalidCells.add(key);
-                        violationTypes.set(key, 'consecutive-horizontal');
-                    }
-                }
-            }
-        }
-
-        for (let col = 0; col < this.gridSize; col++) {
-            for (let row = 0; row <= this.gridSize - 4; row++) {
-                const cells = [
-                    this.grid[row][col],
-                    this.grid[row + 1][col],
-                    this.grid[row + 2][col],
-                    this.grid[row + 3][col]
-                ];
-                
-                if (cells.every(cell => cell && cell === cells[0])) {
-                    console.log(`Found 4+ vertical violation at col ${col}, rows ${row}-${row+3}`);
-                    for (let r = row; r <= row + 3; r++) {
-                        const key = `${r},${col}`;
-                        invalidCells.add(key);
-                        violationTypes.set(key, 'consecutive-vertical');
-                    }
+            
+            // Check final sequence at end of column
+            if (consecutiveCount >= 3) {
+                console.log(`Found vertical violation at col ${col}, rows ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
+                for (let r = consecutiveStart; r < consecutiveStart + consecutiveCount; r++) {
+                    const key = `${r},${col}`;
+                    invalidCells.add(key);
+                    violationTypes.set(key, 'consecutive-vertical');
                 }
             }
         }
