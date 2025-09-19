@@ -405,13 +405,20 @@ class TangoGame {
             }
         }
 
-        // 4. Row/column balance violations
+        // 4. Row/column balance violations - FIXED LOGIC
         for (let i = 0; i < this.gridSize; i++) {
-            // Check row balance
+            // Check row balance - count filled cells only
+            const rowCells = this.grid[i].filter(c => c !== null);
             const rowSuns = this.grid[i].filter(c => c === '☀️').length;
             const rowMoons = this.grid[i].filter(c => c === '🌑').length;
-            if (rowSuns > this.gridSize/2 || rowMoons > this.gridSize/2) {
-                console.log(`Row ${i} balance violation: ${rowSuns} suns, ${rowMoons} moons`);
+            
+            // If row is complete (6 cells) and imbalanced, OR if we already have too many of one type
+            const isRowImbalanced = (rowCells.length === this.gridSize && (rowSuns !== this.gridSize/2 || rowMoons !== this.gridSize/2)) ||
+                                   (rowSuns > this.gridSize/2) || (rowMoons > this.gridSize/2);
+            
+            if (isRowImbalanced) {
+                console.log(`Row ${i} balance violation: ${rowSuns} suns, ${rowMoons} moons (total filled: ${rowCells.length})`);
+                // Highlight ALL filled cells in this row because they're all part of the imbalance
                 for (let j = 0; j < this.gridSize; j++) {
                     if (this.grid[i][j]) {
                         const key = `${i},${j}`;
@@ -421,11 +428,18 @@ class TangoGame {
                 }
             }
 
-            // Check column balance
+            // Check column balance - count filled cells only
+            const colCells = this.grid.map(row => row[i]).filter(c => c !== null);
             const colSuns = this.grid.map(row => row[i]).filter(c => c === '☀️').length;
             const colMoons = this.grid.map(row => row[i]).filter(c => c === '🌑').length;
-            if (colSuns > this.gridSize/2 || colMoons > this.gridSize/2) {
-                console.log(`Column ${i} balance violation: ${colSuns} suns, ${colMoons} moons`);
+            
+            // If column is complete (6 cells) and imbalanced, OR if we already have too many of one type
+            const isColImbalanced = (colCells.length === this.gridSize && (colSuns !== this.gridSize/2 || colMoons !== this.gridSize/2)) ||
+                                   (colSuns > this.gridSize/2) || (colMoons > this.gridSize/2);
+            
+            if (isColImbalanced) {
+                console.log(`Column ${i} balance violation: ${colSuns} suns, ${colMoons} moons (total filled: ${colCells.length})`);
+                // Highlight ALL filled cells in this column because they're all part of the imbalance
                 for (let j = 0; j < this.gridSize; j++) {
                     if (this.grid[j][i]) {
                         const key = `${j},${i}`;
@@ -437,11 +451,14 @@ class TangoGame {
         }
 
         // 5. Constraint violations
+        console.log('Checking constraints:', this.constraints);
         for (const constraint of this.constraints) {
             const [r1, c1] = constraint.cell1;
             const [r2, c2] = constraint.cell2;
             const val1 = this.grid[r1][c1];
             const val2 = this.grid[r2][c2];
+            
+            console.log(`Constraint ${constraint.type} between (${r1},${c1})=${val1} and (${r2},${c2})=${val2}`);
             
             if (val1 && val2) {
                 let isViolation = false;
@@ -453,7 +470,7 @@ class TangoGame {
                 }
                 
                 if (isViolation) {
-                    console.log(`Constraint violation: ${constraint.type} between (${r1},${c1}) and (${r2},${c2})`);
+                    console.log(`CONSTRAINT VIOLATION: ${constraint.type} between (${r1},${c1})=${val1} and (${r2},${c2})=${val2}`);
                     const key1 = `${r1},${c1}`;
                     const key2 = `${r2},${c2}`;
                     invalidCells.add(key1);
