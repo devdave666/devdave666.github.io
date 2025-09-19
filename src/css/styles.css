@@ -96,68 +96,32 @@ button:hover {
     transition: all 0.3s ease;
 }
 
-/* Simplified Invalid Cell Animations - No Laggy Transitions */
+/* Static Invalid Cell Highlighting - NO ANIMATIONS */
 .cell.invalid {
     border: 3px solid #e74c3c !important;
-    background-color: rgba(231, 76, 60, 0.2) !important;
-    box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
-    animation: invalidPulse 1.5s ease-in-out infinite;
+    background-color: rgba(231, 76, 60, 0.3) !important;
+    box-shadow: 0 0 8px rgba(231, 76, 60, 0.6) !important;
 }
 
-/* Different violation types get different colors */
+/* Different violation types get different colors - NO ANIMATIONS */
 .cell.invalid-consecutive-horizontal,
 .cell.invalid-consecutive-vertical {
     border-color: #e74c3c !important;
-    background-color: rgba(231, 76, 60, 0.25) !important;
-    animation: invalidPulseStrong 1s ease-in-out infinite;
+    background-color: rgba(231, 76, 60, 0.35) !important;
+    box-shadow: 0 0 8px rgba(231, 76, 60, 0.7) !important;
 }
 
 .cell.invalid-constraint {
     border-color: #9b59b6 !important;
-    background-color: rgba(155, 89, 182, 0.2) !important;
-    box-shadow: 0 0 10px rgba(155, 89, 182, 0.5);
-    animation: invalidFlash 1.2s ease-in-out infinite;
+    background-color: rgba(155, 89, 182, 0.3) !important;
+    box-shadow: 0 0 8px rgba(155, 89, 182, 0.6) !important;
 }
 
 .cell.invalid-row-balance,
 .cell.invalid-column-balance {
     border-color: #f39c12 !important;
-    background-color: rgba(243, 156, 18, 0.2) !important;
-    box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
-    animation: invalidPulse 1.8s ease-in-out infinite;
-}
-
-/* Simplified keyframe animations */
-@keyframes invalidPulse {
-    0%, 100% { 
-        opacity: 1;
-    }
-    50% { 
-        opacity: 0.7;
-    }
-}
-
-@keyframes invalidPulseStrong {
-    0%, 100% { 
-        opacity: 1;
-        transform: scale(1);
-    }
-    50% { 
-        opacity: 0.6;
-        transform: scale(1.02);
-    }
-}
-
-@keyframes invalidFlash {
-    0%, 100% { 
-        opacity: 1;
-    }
-    25% { 
-        opacity: 0.4;
-    }
-    75% { 
-        opacity: 0.8;
-    }
+    background-color: rgba(243, 156, 18, 0.3) !important;
+    box-shadow: 0 0 8px rgba(243, 156, 18, 0.6) !important;
 }
 
 /* Remove all transitions from cells to prevent lag */

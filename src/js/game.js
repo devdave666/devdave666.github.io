@@ -133,13 +133,8 @@ class TangoGame {
         this.grid[row][col] = newValue;
         this.updateCell(row, col);
 
-        // Clear any existing invalid highlights
-        this.clearInvalidHighlights();
-
-        // Check for violations after a short delay to let user see their move
-        setTimeout(() => {
-            this.validateAndHighlightErrors();
-        }, 300);
+        // Immediately revalidate to update highlights
+        this.validateAndHighlightErrors();
 
         this.checkWinCondition();
     }
@@ -227,11 +222,8 @@ class TangoGame {
             this.grid[lastMove.row][lastMove.col] = lastMove.value;
             this.updateCell(lastMove.row, lastMove.col);
             
-            // Clear highlights and revalidate after undo
-            this.clearInvalidHighlights();
-            setTimeout(() => {
-                this.validateAndHighlightErrors();
-            }, 100);
+            // Immediately revalidate after undo
+            this.validateAndHighlightErrors();
         }
     }
 
@@ -477,33 +469,29 @@ class TangoGame {
         // 6. Apply highlights immediately (no staggering to reduce lag)
         this.highlightInvalidCells(Array.from(invalidCells), violationTypes);
 
-        // 7. Auto-remove highlights after 4 seconds
-        if (invalidCells.size > 0) {
-            setTimeout(() => {
-                this.clearInvalidHighlights();
-            }, 4000);
-        }
+        // 7. REMOVED auto-clear timeout - highlights stay until violations are fixed!
     }
 
     highlightInvalidCells(invalidCellKeys, violationTypes) {
         // Clear existing highlights first
         this.clearInvalidHighlights();
         
-        // Add highlights immediately (no staggering to reduce lag)
+        // Add highlights immediately - INCLUDING FIXED CELLS
         invalidCellKeys.forEach((cellKey) => {
             const [row, col] = cellKey.split(',').map(Number);
             const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
             
-            if (cell && !this.fixedCells.has(cellKey)) {
+            // REMOVED the condition that excluded fixed cells - now ALL violating cells are highlighted
+            if (cell) {
                 const violationType = violationTypes.get(cellKey);
                 cell.classList.add('invalid');
                 
-                // Add specific violation type class for different animations
+                // Add specific violation type class for different colors
                 if (violationType) {
                     cell.classList.add(`invalid-${violationType}`);
                 }
                 
-                console.log(`Highlighting cell (${row},${col}) with type: ${violationType}`);
+                console.log(`Highlighting cell (${row},${col}) with type: ${violationType}, isFixed: ${this.fixedCells.has(cellKey)}`);
             }
         });
     }
