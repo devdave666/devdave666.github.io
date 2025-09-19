@@ -37,9 +37,11 @@
             <div id="game-controls">
                 <button id="rulesBtn">Rules</button>
                 <button id="newGameBtn">New Game</button>
+                <button id="difficultyBtn">Difficulty</button>
                 <button id="hintBtn">Hint</button>
                 <button id="undoBtn">Undo</button>
                 <button id="clearBtn">Clear</button>
+                <button id="statsBtn">Stats</button>
             </div>
             <div id="game-grid"></div>
             <div id="answer-control">
@@ -61,18 +63,33 @@
     <div id="rules-modal" class="modal">
         <div class="modal-content">
             <h2>How to Play Logiq</h2>
-            <ul>
-                <li>Fill the grid with suns (☀️) and moons (🌑)</li>
-                <li>Each row and column must have an equal number of each symbol</li>
-                <li>No more than two identical symbols can be adjacent</li>
-                <li>Cells connected by '=' must contain the same symbol</li>
-                <li>Cells connected by '×' must contain different symbols</li>
-            </ul>
+            <div class="rules-section">
+                <h3>Game Rules</h3>
+                <ul>
+                    <li>Fill the grid with suns (☀️) and moons (🌑)</li>
+                    <li>Each row and column must have an equal number of each symbol</li>
+                    <li>No more than two identical symbols can be adjacent</li>
+                    <li>Cells connected by '=' must contain the same symbol</li>
+                    <li>Cells connected by '×' must contain different symbols</li>
+                </ul>
+            </div>
+            <div class="rules-section">
+                <h3>Keyboard Shortcuts</h3>
+                <ul>
+                    <li><kbd>Ctrl+N</kbd> - New Game</li>
+                    <li><kbd>Ctrl+H</kbd> - Show Hint</li>
+                    <li><kbd>Ctrl+Z</kbd> - Undo</li>
+                    <li><kbd>Ctrl+R</kbd> - Clear Grid</li>
+                    <li><kbd>?</kbd> - Show Rules</li>
+                    <li><kbd>Esc</kbd> - Close Modal</li>
+                </ul>
+            </div>
             <button id="closeRules">Close</button>
         </div>
     </div>
 
     <script type="module" src="/src/js/utils.js"></script>
+    <script type="module" src="/src/js/stats.js"></script>
     <script type="module" src="/src/js/generator.js"></script>
     <script type="module" src="/src/js/solver.js"></script>
     <script type="module" src="/src/js/game.js"></script>

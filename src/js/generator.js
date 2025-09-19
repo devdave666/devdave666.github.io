@@ -5,7 +5,7 @@ export class PuzzleGenerator {
         this.size = size;
     }
 
-    generatePuzzle() {
+    generatePuzzle(difficulty = 'medium') {
         const solution = this.generateValidSolution();
         const puzzle = {
             predefinedCells: [],
@@ -13,16 +13,27 @@ export class PuzzleGenerator {
             solution: solution
         };
 
-        // Add 4-5 predefined cells
-        const positions = this.getRandomPositions(4 + Math.floor(Math.random() * 2));
+        // Difficulty-based parameters
+        const difficultySettings = {
+            easy: { minCells: 6, maxCells: 8, minConstraints: 3, maxConstraints: 5 },
+            medium: { minCells: 4, maxCells: 6, minConstraints: 5, maxConstraints: 7 },
+            hard: { minCells: 2, maxCells: 4, minConstraints: 7, maxConstraints: 9 }
+        };
+
+        const settings = difficultySettings[difficulty] || difficultySettings.medium;
+
+        // Add predefined cells based on difficulty
+        const cellCount = settings.minCells + Math.floor(Math.random() * (settings.maxCells - settings.minCells + 1));
+        const positions = this.getRandomPositions(cellCount);
         positions.forEach(([row, col]) => {
             puzzle.predefinedCells.push({
                 row, col, value: solution[row][col]
             });
         });
 
-        // Add 5-7 meaningful constraints
-        puzzle.constraints = this.generateMeaningfulConstraints(solution);
+        // Add constraints based on difficulty
+        const constraintCount = settings.minConstraints + Math.floor(Math.random() * (settings.maxConstraints - settings.minConstraints + 1));
+        puzzle.constraints = this.generateMeaningfulConstraints(solution, constraintCount);
 
         return puzzle;
     }
@@ -106,11 +117,11 @@ export class PuzzleGenerator {
         return positions;
     }
 
-    generateMeaningfulConstraints(solution) {
+    generateMeaningfulConstraints(solution, targetCount = 6) {
         const constraints = [];
         const used = new Set();
 
-        // Look for meaningful patterns in the solution
+        // Generate horizontal constraints
         for (let row = 0; row < this.size; row++) {
             for (let col = 0; col < this.size - 1; col++) {
                 const key = `${row},${col}-${row},${col + 1}`;
@@ -128,8 +139,26 @@ export class PuzzleGenerator {
             }
         }
 
-        // Shuffle and take 5-7 constraints
-        return this.shuffleArray(constraints).slice(0, 5 + Math.floor(Math.random() * 3));
+        // Generate vertical constraints
+        for (let row = 0; row < this.size - 1; row++) {
+            for (let col = 0; col < this.size; col++) {
+                const key = `${row},${col}-${row + 1},${col}`;
+                if (!used.has(key)) {
+                    const value1 = solution[row][col];
+                    const value2 = solution[row + 1][col];
+                    const type = value1 === value2 ? '=' : '×';
+                    constraints.push({
+                        type,
+                        cell1: [row, col],
+                        cell2: [row + 1, col]
+                    });
+                    used.add(key);
+                }
+            }
+        }
+
+        // Shuffle and take the target number of constraints
+        return this.shuffleArray(constraints).slice(0, targetCount);
     }
 
     shuffleArray(array) {
@@ -192,7 +221,7 @@ function generatePuzzle() {
                 col = Math.floor(Math.random() * gridSize);
             } while (gameGrid[row][col] != null);
             
-            gameGrid[row][col] = Math.random() < 0.5 ? '☀️' : '🌙';
+            gameGrid[row][col] = Math.random() < 0.5 ? '☀️' : '🌑';
         }
 
         if (backtrackSolve(gameGrid, constraints)) {
@@ -214,7 +243,7 @@ function backtrackSolve(gameGrid, constraints, row = 0, col = 0) {
         return backtrackSolve(gameGrid, constraints, nextRow, nextCol);
     }
 
-    for (const symbol of ['☀️', '🌙']) {
+    for (const symbol of ['☀️', '🌑']) {
         gameGrid[row][col] = symbol;
         
         if (isValidState(gameGrid, constraints, row, col) && backtrackSolve(gameGrid, constraints, nextRow, nextCol)) {
@@ -239,14 +268,14 @@ function isValidState(gameGrid, constraints, row, col) {
 function isValidRowConstraints(gameGrid, row) {
     const rowData = gameGrid[row].filter(cell => cell !== null);
     const sunCount = rowData.filter(cell => cell === '☀️').length;
-    const moonCount = rowData.filter(cell => cell === '🌙').length;
+    const moonCount = rowData.filter(cell => cell === '🌑').length;
     return sunCount <= gridSize / 2 && moonCount <= gridSize / 2;
 }
 
 function isValidColumnConstraints(gameGrid, col) {
     const colData = gameGrid.map(row => row[col]).filter(cell => cell !== null);
     const sunCount = colData.filter(cell => cell === '☀️').length;
-    const moonCount = colData.filter(cell => cell === '🌙').length;
+    const moonCount = colData.filter(cell => cell === '🌑').length;
     return sunCount <= gridSize / 2 && moonCount <= gridSize / 2;
 }
 

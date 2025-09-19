@@ -25,7 +25,7 @@ function backtrackSolve(grid, row = 0, col = 0) {
         return backtrackSolve(grid, nextRow, nextCol);
     }
 
-    for (const symbol of ['☀️', '🌙']) {
+    for (const symbol of ['☀️', '🌑']) {
         grid[row][col] = symbol;
 
         if (isValidState(grid, row, col) && backtrackSolve(grid, nextRow, nextCol)) {
@@ -50,14 +50,14 @@ function isValidState(grid, row, col) {
 function isValidRowConstraints(grid, row) {
     const rowData = grid[row].filter(cell => cell !== null);
     const sunCount = rowData.filter(cell => cell === '☀️').length;
-    const moonCount = rowData.filter(cell => cell === '🌙').length;
+    const moonCount = rowData.filter(cell => cell === '🌑').length;
     return sunCount <= grid.length / 2 && moonCount <= grid.length / 2;
 }
 
 function isValidColumnConstraints(grid, col) {
     const colData = grid.map(row => row[col]).filter(cell => cell !== null);
     const sunCount = colData.filter(cell => cell === '☀️').length;
-    const moonCount = colData.filter(cell => cell === '🌙').length;
+    const moonCount = colData.filter(cell => cell === '🌑').length;
     return sunCount <= grid.length / 2 && moonCount <= grid.length / 2;
 }
 

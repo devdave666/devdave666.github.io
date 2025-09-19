@@ -1,4 +1,5 @@
 import { PuzzleGenerator } from './generator.js';
+import { GameStats } from './stats.js';
 
 class TangoGame {
     constructor() {
@@ -12,10 +13,22 @@ class TangoGame {
         this.solution = null;
         this.startTime = null;
         this.timerInterval = null;
+        this.stats = new GameStats();
+        this.difficulty = this.loadDifficulty();
         this.setupGame();
         this.setupAllControls();
+        this.setupKeyboardControls();
         this.initializePuzzle();
         this.initTimer();
+    }
+
+    loadDifficulty() {
+        return localStorage.getItem('logiq-difficulty') || 'medium';
+    }
+
+    saveDifficulty(difficulty) {
+        localStorage.setItem('logiq-difficulty', difficulty);
+        this.difficulty = difficulty;
     }
 
     initTimer() {
@@ -37,7 +50,7 @@ class TangoGame {
     }
 
     initializePuzzle() {
-        const puzzle = this.generator.generatePuzzle();
+        const puzzle = this.generator.generatePuzzle(this.difficulty);
         this.solution = puzzle.solution;
         
         // Clear existing grid
@@ -54,6 +67,7 @@ class TangoGame {
         // Set constraints
         this.constraints = puzzle.constraints;
         this.setupGame(); // Rebuild grid with new constraints
+        this.clearInvalidHighlights(); // Clear any existing highlights
         this.initTimer(); // Reset timer for new game
     }
 
@@ -93,8 +107,10 @@ class TangoGame {
             if (row === r1 && col === c1) {
                 const symbol = document.createElement('div');
                 symbol.className = 'constraint-symbol';
-                symbol.textContent = constraint.type === '=' ? '=' : '×';
+                symbol.textContent = constraint.type;
+                symbol.setAttribute('aria-hidden', 'true'); // Accessibility improvement
                 
+                // Determine direction more efficiently
                 if (c2 > c1) {
                     symbol.classList.add('right');
                 } else if (r2 > r1) {
@@ -117,16 +133,13 @@ class TangoGame {
         this.grid[row][col] = newValue;
         this.updateCell(row, col);
 
-        // Show invalid state if the move violates rules
-        if (newValue && !this.isValidMove(row, col, newValue)) {
-            const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-            if (cell) {
-                cell.classList.add('invalid');
-                setTimeout(() => {
-                    cell.classList.remove('invalid');
-                }, 1000);
-            }
-        }
+        // Clear any existing invalid highlights
+        this.clearInvalidHighlights();
+
+        // Check for violations after a short delay to let user see their move
+        setTimeout(() => {
+            this.validateAndHighlightErrors();
+        }, 300);
 
         this.checkWinCondition();
     }
@@ -145,7 +158,9 @@ class TangoGame {
             'hintBtn': () => this.showHint(),
             'undoBtn': () => this.undo(),
             'clearBtn': () => this.clearGrid(),
-            'showAnswerBtn': () => this.showAnswer()
+            'showAnswerBtn': () => this.showAnswer(),
+            'statsBtn': () => this.showStats(),
+            'difficultyBtn': () => this.showDifficultySelector()
         };
 
         Object.entries(buttons).forEach(([id, handler]) => {
@@ -211,6 +226,12 @@ class TangoGame {
             const lastMove = this.history.pop();
             this.grid[lastMove.row][lastMove.col] = lastMove.value;
             this.updateCell(lastMove.row, lastMove.col);
+            
+            // Clear highlights and revalidate after undo
+            this.clearInvalidHighlights();
+            setTimeout(() => {
+                this.validateAndHighlightErrors();
+            }, 100);
         }
     }
 
@@ -225,6 +246,7 @@ class TangoGame {
             }
         }
         this.history = [];
+        this.clearInvalidHighlights();
     }
 
     showAnswer() {
@@ -295,49 +317,100 @@ class TangoGame {
         }
     }
 
-    isValidMove(row, col, value) {
-        if (!value) return true;
+    validateAndHighlightErrors() {
+        const invalidCells = [];
 
-        // Check row balance
-        const rowValues = [...this.grid[row]];
-        rowValues[col] = value;
-        const rowSuns = rowValues.filter(c => c === '☀️').length;
-        const rowMoons = rowValues.filter(c => c === '🌑').length;
-        if (rowSuns > this.gridSize/2 || rowMoons > this.gridSize/2) return false;
-
-        // Check column balance
-        const colValues = this.grid.map(r => r[col]);
-        colValues[row] = value;
-        const colSuns = colValues.filter(c => c === '☀️').length;
-        const colMoons = colValues.filter(c => c === '🌑').length;
-        if (colSuns > this.gridSize/2 || colMoons > this.gridSize/2) return false;
-
-        // Check three in a row horizontally
-        if (col >= 2 && rowValues[col-2] === value && rowValues[col-1] === value) return false;
-        if (col <= this.gridSize-3 && rowValues[col+1] === value && rowValues[col+2] === value) return false;
-
-        // Check three in a row vertically
-        if (row >= 2 && colValues[row-2] === value && colValues[row-1] === value) return false;
-        if (row <= this.gridSize-3 && colValues[row+1] === value && colValues[row+2] === value) return false;
-
-        // Check constraints
-        for (const constraint of this.constraints) {
-            const [r1, c1] = constraint.cell1;
-            const [r2, c2] = constraint.cell2;
-            
-            if ((row === r1 && col === c1) || (row === r2 && col === c2)) {
-                const otherRow = (row === r1 && col === c1) ? r2 : r1;
-                const otherCol = (row === r1 && col === c1) ? c2 : c1;
-                const otherValue = this.grid[otherRow][otherCol];
+        // Check for three consecutive symbols horizontally
+        for (let row = 0; row < this.gridSize; row++) {
+            for (let col = 0; col <= this.gridSize - 3; col++) {
+                const cell1 = this.grid[row][col];
+                const cell2 = this.grid[row][col + 1];
+                const cell3 = this.grid[row][col + 2];
                 
-                if (otherValue) {
-                    if (constraint.type === '=' && value !== otherValue) return false;
-                    if (constraint.type === '×' && value === otherValue) return false;
+                if (cell1 && cell2 && cell3 && cell1 === cell2 && cell2 === cell3) {
+                    invalidCells.push([row, col], [row, col + 1], [row, col + 2]);
                 }
             }
         }
 
-        return true;
+        // Check for three consecutive symbols vertically
+        for (let col = 0; col < this.gridSize; col++) {
+            for (let row = 0; row <= this.gridSize - 3; row++) {
+                const cell1 = this.grid[row][col];
+                const cell2 = this.grid[row + 1][col];
+                const cell3 = this.grid[row + 2][col];
+                
+                if (cell1 && cell2 && cell3 && cell1 === cell2 && cell2 === cell3) {
+                    invalidCells.push([row, col], [row + 1, col], [row + 2, col]);
+                }
+            }
+        }
+
+        // Check row/column balance violations
+        for (let i = 0; i < this.gridSize; i++) {
+            // Check row balance
+            const rowSuns = this.grid[i].filter(c => c === '☀️').length;
+            const rowMoons = this.grid[i].filter(c => c === '🌑').length;
+            if (rowSuns > this.gridSize/2 || rowMoons > this.gridSize/2) {
+                for (let j = 0; j < this.gridSize; j++) {
+                    if (this.grid[i][j]) {
+                        invalidCells.push([i, j]);
+                    }
+                }
+            }
+
+            // Check column balance
+            const colSuns = this.grid.map(row => row[i]).filter(c => c === '☀️').length;
+            const colMoons = this.grid.map(row => row[i]).filter(c => c === '🌑').length;
+            if (colSuns > this.gridSize/2 || colMoons > this.gridSize/2) {
+                for (let j = 0; j < this.gridSize; j++) {
+                    if (this.grid[j][i]) {
+                        invalidCells.push([j, i]);
+                    }
+                }
+            }
+        }
+
+        // Check constraint violations
+        for (const constraint of this.constraints) {
+            const [r1, c1] = constraint.cell1;
+            const [r2, c2] = constraint.cell2;
+            const val1 = this.grid[r1][c1];
+            const val2 = this.grid[r2][c2];
+            
+            if (val1 && val2) {
+                if (constraint.type === '=' && val1 !== val2) {
+                    invalidCells.push([r1, c1], [r2, c2]);
+                }
+                if (constraint.type === '×' && val1 === val2) {
+                    invalidCells.push([r1, c1], [r2, c2]);
+                }
+            }
+        }
+
+        // Highlight invalid cells
+        const uniqueInvalidCells = [...new Set(invalidCells.map(cell => `${cell[0]},${cell[1]}`))];
+        uniqueInvalidCells.forEach(cellKey => {
+            const [row, col] = cellKey.split(',').map(Number);
+            const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+            if (cell && !this.fixedCells.has(cellKey)) {
+                cell.classList.add('invalid');
+            }
+        });
+
+        // Auto-remove highlights after 2 seconds
+        if (uniqueInvalidCells.length > 0) {
+            setTimeout(() => {
+                this.clearInvalidHighlights();
+            }, 2000);
+        }
+    }
+
+    clearInvalidHighlights() {
+        const invalidCells = document.querySelectorAll('.cell.invalid');
+        invalidCells.forEach(cell => {
+            cell.classList.remove('invalid');
+        });
     }
 
     formatTime(totalSeconds) {
@@ -377,12 +450,143 @@ class TangoGame {
             const timeTaken = Math.floor((new Date() - this.startTime) / 1000);
             const timeString = this.formatTime(timeTaken);
             
+            // Save stats
+            this.stats.recordWin(timeTaken, this.difficulty);
+            
             setTimeout(() => {
                 if (confirm(`🎉 Fantastic job! You solved the puzzle in ${timeString}! Would you like to start a new game?`)) {
                     this.newGame();
                 }
             }, 100);
         }
+    }
+
+    showStats() {
+        const stats = this.stats.getStats();
+        const modal = this.createModal('Game Statistics', `
+            <div class="stats-container">
+                <div class="stat-item">
+                    <span class="stat-label">Games Played:</span>
+                    <span class="stat-value">${stats.gamesPlayed}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Games Won:</span>
+                    <span class="stat-value">${stats.gamesWon}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Win Rate:</span>
+                    <span class="stat-value">${stats.winRate}%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Best Time:</span>
+                    <span class="stat-value">${stats.bestTime ? this.formatTime(stats.bestTime) : 'N/A'}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Average Time:</span>
+                    <span class="stat-value">${stats.averageTime ? this.formatTime(Math.round(stats.averageTime)) : 'N/A'}</span>
+                </div>
+            </div>
+        `);
+        modal.style.display = 'block';
+    }
+
+    showDifficultySelector() {
+        const modal = this.createModal('Select Difficulty', `
+            <div class="difficulty-container">
+                <button class="difficulty-btn ${this.difficulty === 'easy' ? 'active' : ''}" data-difficulty="easy">
+                    Easy<br><small>More clues, fewer constraints</small>
+                </button>
+                <button class="difficulty-btn ${this.difficulty === 'medium' ? 'active' : ''}" data-difficulty="medium">
+                    Medium<br><small>Balanced challenge</small>
+                </button>
+                <button class="difficulty-btn ${this.difficulty === 'hard' ? 'active' : ''}" data-difficulty="hard">
+                    Hard<br><small>Fewer clues, more constraints</small>
+                </button>
+            </div>
+        `);
+        
+        modal.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const difficulty = e.target.dataset.difficulty;
+                this.saveDifficulty(difficulty);
+                modal.style.display = 'none';
+                this.newGame();
+            });
+        });
+        
+        modal.style.display = 'block';
+    }
+
+    createModal(title, content) {
+        const existingModal = document.getElementById('dynamic-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'dynamic-modal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h2>${title}</h2>
+                ${content}
+                <button class="close-modal">Close</button>
+            </div>
+        `;
+
+        modal.querySelector('.close-modal').addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        document.body.appendChild(modal);
+        return modal;
+    }
+
+    setupKeyboardControls() {
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'n':
+                case 'N':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        this.newGame();
+                    }
+                    break;
+                case 'h':
+                case 'H':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        this.showHint();
+                    }
+                    break;
+                case 'z':
+                case 'Z':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        this.undo();
+                    }
+                    break;
+                case 'r':
+                case 'R':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        this.clearGrid();
+                    }
+                    break;
+                case '?':
+                    this.showRules();
+                    break;
+                case 'Escape':
+                    // Close any open modals
+                    const modals = document.querySelectorAll('.modal');
+                    modals.forEach(modal => {
+                        if (modal.style.display === 'block') {
+                            modal.style.display = 'none';
+                        }
+                    });
+                    break;
+            }
+        });
     }
 }
 

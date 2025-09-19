@@ -2,10 +2,12 @@
   "name": "logiq-game",
   "version": "1.0.0",
   "description": "A daily logic puzzle game",
+  "type": "module",
   "main": "src/js/game.js",
   "scripts": {
     "start": "serve .",
-    "test": "jest"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "npm test -- --watch"
   },
   "dependencies": {
     "serve": "^14.0.0"
@@ -13,5 +15,9 @@
   "devDependencies": {
     "jest": "^29.0.0",
     "jest-environment-jsdom": "^29.0.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "transform": {}
   }
 }
