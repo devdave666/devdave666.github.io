@@ -47,33 +47,6 @@
             <div id="answer-control">
                 <button id="showAnswerBtn" class="answer-button">Show Answer</button>        
             </div>
-            
-            <!-- Game Rules and Legend -->
-            <div id="game-legend">
-                <h3>Game Rules</h3>
-                <ul>
-                    <li>Fill grid with suns (☀️) and moons (🌑)</li>
-                    <li>Each row/column must have exactly 3 of each symbol</li>
-                    <li>No more than 2 consecutive identical symbols</li>
-                    <li>Follow constraint symbols: <strong>=</strong> (same) and <strong>×</strong> (different)</li>
-                </ul>
-                
-                <h3>Highlight Colors</h3>
-                <div class="legend-items">
-                    <div class="legend-item">
-                        <div class="legend-color red"></div>
-                        <span>Red: 3+ consecutive symbols or too many in row/column</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color purple"></div>
-                        <span>Purple: Constraint violations (= or × rules broken)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color orange"></div>
-                        <span>Orange: Balance violations (more than 3 of same type)</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </main>
 
@@ -94,11 +67,27 @@
                 <h3>Game Rules</h3>
                 <ul>
                     <li>Fill the grid with suns (☀️) and moons (🌑)</li>
-                    <li>Each row and column must have an equal number of each symbol</li>
-                    <li>No more than two identical symbols can be adjacent</li>
-                    <li>Cells connected by '=' must contain the same symbol</li>
-                    <li>Cells connected by '×' must contain different symbols</li>
+                    <li>Each row and column must have exactly 3 of each symbol</li>
+                    <li>No more than 2 consecutive identical symbols</li>
+                    <li>Follow constraint symbols: <strong>=</strong> (same) and <strong>×</strong> (different)</li>
                 </ul>
+            </div>
+            <div class="rules-section">
+                <h3>Error Highlight Colors</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-color red"></div>
+                        <span>Red: 3+ consecutive symbols or too many in row/column</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color purple"></div>
+                        <span>Purple: Constraint violations (= or × rules broken)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color orange"></div>
+                        <span>Orange: Balance violations (more than 3 of same type)</span>
+                    </div>
+                </div>
             </div>
             <div class="rules-section">
                 <h3>Keyboard Shortcuts</h3>
@@ -111,7 +100,9 @@
                     <li><kbd>Esc</kbd> - Close Modal</li>
                 </ul>
             </div>
-            <button id="closeRules">Close</button>
+            <div class="modal-buttons">
+                <button type="button" id="closeRules" class="close-modal">Close</button>
+            </div>
         </div>
     </div>
 
