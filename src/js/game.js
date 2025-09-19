@@ -313,241 +313,149 @@ class TangoGame {
         const invalidCells = new Set();
         const violationTypes = new Map();
 
-        // Debug: Log current grid state
-        console.log('=== VALIDATION DEBUG ===');
-        console.log('Current grid state:');
-        for (let i = 0; i < this.gridSize; i++) {
-            console.log(`Row ${i}:`, this.grid[i]);
-        }
-        console.log('=== CHECKING CONSECUTIVE SYMBOLS ===');
+        console.log('=== SIMPLE VALIDATION ===');
 
-        // 1. COMPREHENSIVE consecutive symbols detection - horizontal
+        // 1. CHECK EACH ROW - if more than 3 of same symbol, highlight excess
         for (let row = 0; row < this.gridSize; row++) {
-            // Find all consecutive sequences in this row
-            let currentSymbol = null;
-            let consecutiveCount = 0;
-            let consecutiveStart = -1;
+            const suns = [];
+            const moons = [];
             
+            // Collect positions of suns and moons
             for (let col = 0; col < this.gridSize; col++) {
-                const cell = this.grid[row][col];
-                
-                if (cell && cell === currentSymbol) {
-                    // Continue the sequence
-                    consecutiveCount++;
-                } else {
-                    // Check if previous sequence was a violation (3+ consecutive)
-                    if (consecutiveCount >= 3) {
-                        console.log(`Found horizontal violation at row ${row}, cols ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
-                        // Highlight ALL cells in the consecutive sequence
-                        for (let c = consecutiveStart; c < consecutiveStart + consecutiveCount; c++) {
-                            const key = `${row},${c}`;
-                            invalidCells.add(key);
-                            violationTypes.set(key, 'consecutive-horizontal');
-                        }
-                    }
-                    
-                    // Start new sequence
-                    if (cell) {
-                        currentSymbol = cell;
-                        consecutiveCount = 1;
-                        consecutiveStart = col;
-                    } else {
-                        currentSymbol = null;
-                        consecutiveCount = 0;
-                        consecutiveStart = -1;
-                    }
+                if (this.grid[row][col] === '☀️') suns.push([row, col]);
+                if (this.grid[row][col] === '🌑') moons.push([row, col]);
+            }
+            
+            // If more than 3 suns, highlight the excess ones
+            if (suns.length > 3) {
+                console.log(`Row ${row}: ${suns.length} suns - highlighting excess`);
+                for (let i = 3; i < suns.length; i++) {
+                    const key = `${suns[i][0]},${suns[i][1]}`;
+                    invalidCells.add(key);
+                    violationTypes.set(key, 'row-balance');
                 }
             }
             
-            // Check final sequence at end of row
-            if (consecutiveCount >= 3) {
-                console.log(`Found horizontal violation at row ${row}, cols ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
-                for (let c = consecutiveStart; c < consecutiveStart + consecutiveCount; c++) {
-                    const key = `${row},${c}`;
+            // If more than 3 moons, highlight the excess ones
+            if (moons.length > 3) {
+                console.log(`Row ${row}: ${moons.length} moons - highlighting excess`);
+                for (let i = 3; i < moons.length; i++) {
+                    const key = `${moons[i][0]},${moons[i][1]}`;
                     invalidCells.add(key);
-                    violationTypes.set(key, 'consecutive-horizontal');
+                    violationTypes.set(key, 'row-balance');
                 }
             }
         }
 
-        // 2. COMPREHENSIVE consecutive symbols detection - vertical
+        // 2. CHECK EACH COLUMN - if more than 3 of same symbol, highlight excess
         for (let col = 0; col < this.gridSize; col++) {
-            console.log(`\nChecking column ${col}:`);
-            // Find all consecutive sequences in this column
-            let currentSymbol = null;
-            let consecutiveCount = 0;
-            let consecutiveStart = -1;
+            const suns = [];
+            const moons = [];
             
+            // Collect positions of suns and moons
             for (let row = 0; row < this.gridSize; row++) {
-                const cell = this.grid[row][col];
-                console.log(`  Row ${row}: ${cell || 'empty'}`);
+                if (this.grid[row][col] === '☀️') suns.push([row, col]);
+                if (this.grid[row][col] === '🌑') moons.push([row, col]);
+            }
+            
+            // If more than 3 suns, highlight the excess ones
+            if (suns.length > 3) {
+                console.log(`Column ${col}: ${suns.length} suns - highlighting excess`);
+                for (let i = 3; i < suns.length; i++) {
+                    const key = `${suns[i][0]},${suns[i][1]}`;
+                    invalidCells.add(key);
+                    violationTypes.set(key, 'column-balance');
+                }
+            }
+            
+            // If more than 3 moons, highlight the excess ones
+            if (moons.length > 3) {
+                console.log(`Column ${col}: ${moons.length} moons - highlighting excess`);
+                for (let i = 3; i < moons.length; i++) {
+                    const key = `${moons[i][0]},${moons[i][1]}`;
+                    invalidCells.add(key);
+                    violationTypes.set(key, 'column-balance');
+                }
+            }
+        }
+
+        // 3. CHECK FOR 3+ CONSECUTIVE - horizontal
+        for (let row = 0; row < this.gridSize; row++) {
+            for (let col = 0; col <= this.gridSize - 3; col++) {
+                const cell1 = this.grid[row][col];
+                const cell2 = this.grid[row][col + 1];
+                const cell3 = this.grid[row][col + 2];
                 
-                if (cell && cell === currentSymbol) {
-                    // Continue the sequence
-                    consecutiveCount++;
-                    console.log(`    Continuing sequence: ${consecutiveCount} consecutive ${currentSymbol}`);
-                } else {
-                    // Check if previous sequence was a violation (3+ consecutive)
-                    if (consecutiveCount >= 3) {
-                        console.log(`    VIOLATION! Found vertical violation at col ${col}, rows ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
-                        // Highlight ALL cells in the consecutive sequence
-                        for (let r = consecutiveStart; r < consecutiveStart + consecutiveCount; r++) {
-                            const key = `${r},${col}`;
-                            invalidCells.add(key);
-                            violationTypes.set(key, 'consecutive-vertical');
-                            console.log(`      Highlighting (${r},${col})`);
-                        }
+                if (cell1 && cell1 === cell2 && cell2 === cell3) {
+                    console.log(`3+ consecutive horizontal at row ${row}, cols ${col}-${col+2}`);
+                    for (let c = col; c <= col + 2; c++) {
+                        const key = `${row},${c}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-horizontal');
                     }
                     
-                    // Start new sequence
-                    if (cell) {
-                        currentSymbol = cell;
-                        consecutiveCount = 1;
-                        consecutiveStart = row;
-                        console.log(`    Starting new sequence: ${currentSymbol} at row ${row}`);
-                    } else {
-                        currentSymbol = null;
-                        consecutiveCount = 0;
-                        consecutiveStart = -1;
-                        console.log(`    Resetting sequence (empty cell)`);
-                    }
-                }
-            }
-            
-            // Check final sequence at end of column
-            if (consecutiveCount >= 3) {
-                console.log(`  FINAL VIOLATION! Found vertical violation at col ${col}, rows ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
-                for (let r = consecutiveStart; r < consecutiveStart + consecutiveCount; r++) {
-                    const key = `${r},${col}`;
-                    invalidCells.add(key);
-                    violationTypes.set(key, 'consecutive-vertical');
-                    console.log(`    Final highlighting (${r},${col})`);
-                }
-            }
-        }
-
-        // 4. Row/column balance violations - ONLY HIGHLIGHT RULE-BREAKING CELLS
-        for (let i = 0; i < this.gridSize; i++) {
-            // Check row balance
-            const rowSuns = this.grid[i].filter(c => c === '☀️').length;
-            const rowMoons = this.grid[i].filter(c => c === '🌑').length;
-            
-            // Only highlight cells that are EXCEEDING the limit (more than 3)
-            if (rowSuns > this.gridSize/2) {
-                console.log(`Row ${i} has TOO MANY SUNS: ${rowSuns} suns (max allowed: 3)`);
-                // Highlight ONLY the excess suns (the ones breaking the rule)
-                let sunCount = 0;
-                for (let j = 0; j < this.gridSize; j++) {
-                    if (this.grid[i][j] === '☀️') {
-                        sunCount++;
-                        // Highlight suns beyond the 3rd one (the rule-breakers)
-                        if (sunCount > this.gridSize/2) {
-                            const key = `${i},${j}`;
-                            invalidCells.add(key);
-                            violationTypes.set(key, 'row-balance');
-                            console.log(`  Highlighting excess sun at (${i},${j}) - sun #${sunCount}`);
-                        }
-                    }
-                }
-            }
-            
-            if (rowMoons > this.gridSize/2) {
-                console.log(`Row ${i} has TOO MANY MOONS: ${rowMoons} moons (max allowed: 3)`);
-                // Highlight ONLY the excess moons (the ones breaking the rule)
-                let moonCount = 0;
-                for (let j = 0; j < this.gridSize; j++) {
-                    if (this.grid[i][j] === '🌑') {
-                        moonCount++;
-                        // Highlight moons beyond the 3rd one (the rule-breakers)
-                        if (moonCount > this.gridSize/2) {
-                            const key = `${i},${j}`;
-                            invalidCells.add(key);
-                            violationTypes.set(key, 'row-balance');
-                            console.log(`  Highlighting excess moon at (${i},${j}) - moon #${moonCount}`);
-                        }
-                    }
-                }
-            }
-
-            // Check column balance
-            const colSuns = this.grid.map(row => row[i]).filter(c => c === '☀️').length;
-            const colMoons = this.grid.map(row => row[i]).filter(c => c === '🌑').length;
-            
-            // Only highlight cells that are EXCEEDING the limit (more than 3)
-            if (colSuns > this.gridSize/2) {
-                console.log(`Column ${i} has TOO MANY SUNS: ${colSuns} suns (max allowed: 3)`);
-                // Highlight ONLY the excess suns (the ones breaking the rule)
-                let sunCount = 0;
-                for (let j = 0; j < this.gridSize; j++) {
-                    if (this.grid[j][i] === '☀️') {
-                        sunCount++;
-                        // Highlight suns beyond the 3rd one (the rule-breakers)
-                        if (sunCount > this.gridSize/2) {
-                            const key = `${j},${i}`;
-                            invalidCells.add(key);
-                            violationTypes.set(key, 'column-balance');
-                            console.log(`  Highlighting excess sun at (${j},${i}) - sun #${sunCount}`);
-                        }
-                    }
-                }
-            }
-            
-            if (colMoons > this.gridSize/2) {
-                console.log(`Column ${i} has TOO MANY MOONS: ${colMoons} moons (max allowed: 3)`);
-                // Highlight ONLY the excess moons (the ones breaking the rule)
-                let moonCount = 0;
-                for (let j = 0; j < this.gridSize; j++) {
-                    if (this.grid[j][i] === '🌑') {
-                        moonCount++;
-                        // Highlight moons beyond the 3rd one (the rule-breakers)
-                        if (moonCount > this.gridSize/2) {
-                            const key = `${j},${i}`;
-                            invalidCells.add(key);
-                            violationTypes.set(key, 'column-balance');
-                            console.log(`  Highlighting excess moon at (${j},${i}) - moon #${moonCount}`);
-                        }
+                    // Check for 4th consecutive
+                    if (col + 3 < this.gridSize && this.grid[row][col + 3] === cell1) {
+                        const key = `${row},${col + 3}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-horizontal');
                     }
                 }
             }
         }
 
-        // 5. Constraint violations
-        console.log('Checking constraints:', this.constraints);
+        // 4. CHECK FOR 3+ CONSECUTIVE - vertical
+        for (let col = 0; col < this.gridSize; col++) {
+            for (let row = 0; row <= this.gridSize - 3; row++) {
+                const cell1 = this.grid[row][col];
+                const cell2 = this.grid[row + 1][col];
+                const cell3 = this.grid[row + 2][col];
+                
+                if (cell1 && cell1 === cell2 && cell2 === cell3) {
+                    console.log(`3+ consecutive vertical at col ${col}, rows ${row}-${row+2}`);
+                    for (let r = row; r <= row + 2; r++) {
+                        const key = `${r},${col}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-vertical');
+                    }
+                    
+                    // Check for 4th consecutive
+                    if (row + 3 < this.gridSize && this.grid[row + 3][col] === cell1) {
+                        const key = `${row + 3},${col}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-vertical');
+                    }
+                }
+            }
+        }
+
+        // 5. CHECK CONSTRAINTS
         for (const constraint of this.constraints) {
             const [r1, c1] = constraint.cell1;
             const [r2, c2] = constraint.cell2;
             const val1 = this.grid[r1][c1];
             const val2 = this.grid[r2][c2];
             
-            console.log(`Constraint ${constraint.type} between (${r1},${c1})=${val1} and (${r2},${c2})=${val2}`);
-            
             if (val1 && val2) {
-                let isViolation = false;
                 if (constraint.type === '=' && val1 !== val2) {
-                    isViolation = true;
+                    console.log(`Constraint violation: = between different symbols`);
+                    invalidCells.add(`${r1},${c1}`);
+                    invalidCells.add(`${r2},${c2}`);
+                    violationTypes.set(`${r1},${c1}`, 'constraint');
+                    violationTypes.set(`${r2},${c2}`, 'constraint');
                 }
                 if (constraint.type === '×' && val1 === val2) {
-                    isViolation = true;
-                }
-                
-                if (isViolation) {
-                    console.log(`CONSTRAINT VIOLATION: ${constraint.type} between (${r1},${c1})=${val1} and (${r2},${c2})=${val2}`);
-                    const key1 = `${r1},${c1}`;
-                    const key2 = `${r2},${c2}`;
-                    invalidCells.add(key1);
-                    invalidCells.add(key2);
-                    violationTypes.set(key1, 'constraint');
-                    violationTypes.set(key2, 'constraint');
+                    console.log(`Constraint violation: × between same symbols`);
+                    invalidCells.add(`${r1},${c1}`);
+                    invalidCells.add(`${r2},${c2}`);
+                    violationTypes.set(`${r1},${c1}`, 'constraint');
+                    violationTypes.set(`${r2},${c2}`, 'constraint');
                 }
             }
         }
 
-        console.log('Invalid cells found:', Array.from(invalidCells));
-
-        // 6. Apply highlights immediately (no staggering to reduce lag)
+        console.log('Total invalid cells:', invalidCells.size);
         this.highlightInvalidCells(Array.from(invalidCells), violationTypes);
-
-        // 7. REMOVED auto-clear timeout - highlights stay until violations are fixed!
     }
 
     highlightInvalidCells(invalidCellKeys, violationTypes) {
