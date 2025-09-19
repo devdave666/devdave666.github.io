@@ -315,7 +315,7 @@ class TangoGame {
 
         console.log('=== SIMPLE VALIDATION ===');
 
-        // 1. CHECK EACH ROW - if more than 3 of same symbol, highlight excess
+        // 1. CHECK EACH ROW - if more than 3 of same symbol, highlight ALL of them
         for (let row = 0; row < this.gridSize; row++) {
             const suns = [];
             const moons = [];
@@ -326,20 +326,20 @@ class TangoGame {
                 if (this.grid[row][col] === '🌑') moons.push([row, col]);
             }
             
-            // If more than 3 suns, highlight the excess ones
+            // If more than 3 suns, highlight ALL of them (they're all breaking the rule)
             if (suns.length > 3) {
-                console.log(`Row ${row}: ${suns.length} suns - highlighting excess`);
-                for (let i = 3; i < suns.length; i++) {
+                console.log(`Row ${row}: ${suns.length} suns - highlighting ALL`);
+                for (let i = 0; i < suns.length; i++) {
                     const key = `${suns[i][0]},${suns[i][1]}`;
                     invalidCells.add(key);
                     violationTypes.set(key, 'row-balance');
                 }
             }
             
-            // If more than 3 moons, highlight the excess ones
+            // If more than 3 moons, highlight ALL of them (they're all breaking the rule)
             if (moons.length > 3) {
-                console.log(`Row ${row}: ${moons.length} moons - highlighting excess`);
-                for (let i = 3; i < moons.length; i++) {
+                console.log(`Row ${row}: ${moons.length} moons - highlighting ALL`);
+                for (let i = 0; i < moons.length; i++) {
                     const key = `${moons[i][0]},${moons[i][1]}`;
                     invalidCells.add(key);
                     violationTypes.set(key, 'row-balance');
@@ -347,7 +347,7 @@ class TangoGame {
             }
         }
 
-        // 2. CHECK EACH COLUMN - if more than 3 of same symbol, highlight excess
+        // 2. CHECK EACH COLUMN - if more than 3 of same symbol, highlight ALL of them
         for (let col = 0; col < this.gridSize; col++) {
             const suns = [];
             const moons = [];
@@ -358,20 +358,20 @@ class TangoGame {
                 if (this.grid[row][col] === '🌑') moons.push([row, col]);
             }
             
-            // If more than 3 suns, highlight the excess ones
+            // If more than 3 suns, highlight ALL of them (they're all breaking the rule)
             if (suns.length > 3) {
-                console.log(`Column ${col}: ${suns.length} suns - highlighting excess`);
-                for (let i = 3; i < suns.length; i++) {
+                console.log(`Column ${col}: ${suns.length} suns - highlighting ALL`);
+                for (let i = 0; i < suns.length; i++) {
                     const key = `${suns[i][0]},${suns[i][1]}`;
                     invalidCells.add(key);
                     violationTypes.set(key, 'column-balance');
                 }
             }
             
-            // If more than 3 moons, highlight the excess ones
+            // If more than 3 moons, highlight ALL of them (they're all breaking the rule)
             if (moons.length > 3) {
-                console.log(`Column ${col}: ${moons.length} moons - highlighting excess`);
-                for (let i = 3; i < moons.length; i++) {
+                console.log(`Column ${col}: ${moons.length} moons - highlighting ALL`);
+                for (let i = 0; i < moons.length; i++) {
                     const key = `${moons[i][0]},${moons[i][1]}`;
                     invalidCells.add(key);
                     violationTypes.set(key, 'column-balance');
