@@ -318,9 +318,10 @@ class TangoGame {
     }
 
     validateAndHighlightErrors() {
-        const invalidCells = [];
+        const invalidCells = new Set();
+        const violationTypes = new Map(); // Track what type of violation each cell has
 
-        // Check for three consecutive symbols horizontally
+        // 1. Check for three consecutive symbols horizontally
         for (let row = 0; row < this.gridSize; row++) {
             for (let col = 0; col <= this.gridSize - 3; col++) {
                 const cell1 = this.grid[row][col];
@@ -328,12 +329,17 @@ class TangoGame {
                 const cell3 = this.grid[row][col + 2];
                 
                 if (cell1 && cell2 && cell3 && cell1 === cell2 && cell2 === cell3) {
-                    invalidCells.push([row, col], [row, col + 1], [row, col + 2]);
+                    // Mark all three cells as invalid
+                    for (let c = col; c <= col + 2; c++) {
+                        const key = `${row},${c}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-horizontal');
+                    }
                 }
             }
         }
 
-        // Check for three consecutive symbols vertically
+        // 2. Check for three consecutive symbols vertically
         for (let col = 0; col < this.gridSize; col++) {
             for (let row = 0; row <= this.gridSize - 3; row++) {
                 const cell1 = this.grid[row][col];
@@ -341,12 +347,17 @@ class TangoGame {
                 const cell3 = this.grid[row + 2][col];
                 
                 if (cell1 && cell2 && cell3 && cell1 === cell2 && cell2 === cell3) {
-                    invalidCells.push([row, col], [row + 1, col], [row + 2, col]);
+                    // Mark all three cells as invalid
+                    for (let r = row; r <= row + 2; r++) {
+                        const key = `${r},${col}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'consecutive-vertical');
+                    }
                 }
             }
         }
 
-        // Check row/column balance violations
+        // 3. Check row/column balance violations
         for (let i = 0; i < this.gridSize; i++) {
             // Check row balance
             const rowSuns = this.grid[i].filter(c => c === '☀️').length;
@@ -354,7 +365,9 @@ class TangoGame {
             if (rowSuns > this.gridSize/2 || rowMoons > this.gridSize/2) {
                 for (let j = 0; j < this.gridSize; j++) {
                     if (this.grid[i][j]) {
-                        invalidCells.push([i, j]);
+                        const key = `${i},${j}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'row-balance');
                     }
                 }
             }
@@ -365,13 +378,15 @@ class TangoGame {
             if (colSuns > this.gridSize/2 || colMoons > this.gridSize/2) {
                 for (let j = 0; j < this.gridSize; j++) {
                     if (this.grid[j][i]) {
-                        invalidCells.push([j, i]);
+                        const key = `${j},${i}`;
+                        invalidCells.add(key);
+                        violationTypes.set(key, 'column-balance');
                     }
                 }
             }
         }
 
-        // Check constraint violations
+        // 4. Check constraint violations
         for (const constraint of this.constraints) {
             const [r1, c1] = constraint.cell1;
             const [r2, c2] = constraint.cell2;
@@ -379,37 +394,82 @@ class TangoGame {
             const val2 = this.grid[r2][c2];
             
             if (val1 && val2) {
+                let isViolation = false;
                 if (constraint.type === '=' && val1 !== val2) {
-                    invalidCells.push([r1, c1], [r2, c2]);
+                    isViolation = true;
                 }
                 if (constraint.type === '×' && val1 === val2) {
-                    invalidCells.push([r1, c1], [r2, c2]);
+                    isViolation = true;
+                }
+                
+                if (isViolation) {
+                    const key1 = `${r1},${c1}`;
+                    const key2 = `${r2},${c2}`;
+                    invalidCells.add(key1);
+                    invalidCells.add(key2);
+                    violationTypes.set(key1, 'constraint');
+                    violationTypes.set(key2, 'constraint');
                 }
             }
         }
 
-        // Highlight invalid cells
-        const uniqueInvalidCells = [...new Set(invalidCells.map(cell => `${cell[0]},${cell[1]}`))];
-        uniqueInvalidCells.forEach(cellKey => {
-            const [row, col] = cellKey.split(',').map(Number);
-            const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-            if (cell && !this.fixedCells.has(cellKey)) {
-                cell.classList.add('invalid');
-            }
-        });
+        // 5. Apply highlights with staggered animation
+        this.highlightInvalidCells(Array.from(invalidCells), violationTypes);
 
-        // Auto-remove highlights after 2 seconds
-        if (uniqueInvalidCells.length > 0) {
+        // 6. Auto-remove highlights after 3 seconds
+        if (invalidCells.size > 0) {
             setTimeout(() => {
                 this.clearInvalidHighlights();
-            }, 2000);
+            }, 3000);
         }
+    }
+
+    highlightInvalidCells(invalidCellKeys, violationTypes) {
+        // Clear existing highlights first
+        this.clearInvalidHighlights();
+        
+        // Add highlights with staggered timing for better visual effect
+        invalidCellKeys.forEach((cellKey, index) => {
+            setTimeout(() => {
+                const [row, col] = cellKey.split(',').map(Number);
+                const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                
+                if (cell && !this.fixedCells.has(cellKey)) {
+                    const violationType = violationTypes.get(cellKey);
+                    cell.classList.add('invalid');
+                    
+                    // Add specific violation type class for different animations
+                    if (violationType) {
+                        cell.classList.add(`invalid-${violationType}`);
+                    }
+                    
+                    // Add a subtle shake effect
+                    cell.style.animation = 'invalidShake 0.5s ease-in-out';
+                    
+                    // Remove the shake animation after it completes
+                    setTimeout(() => {
+                        if (cell.style.animation === 'invalidShake 0.5s ease-in-out') {
+                            cell.style.animation = '';
+                        }
+                    }, 500);
+                }
+            }, index * 50); // Stagger by 50ms per cell
+        });
     }
 
     clearInvalidHighlights() {
         const invalidCells = document.querySelectorAll('.cell.invalid');
         invalidCells.forEach(cell => {
+            // Remove all invalid-related classes
             cell.classList.remove('invalid');
+            cell.classList.remove('invalid-consecutive-horizontal');
+            cell.classList.remove('invalid-consecutive-vertical');
+            cell.classList.remove('invalid-row-balance');
+            cell.classList.remove('invalid-column-balance');
+            cell.classList.remove('invalid-constraint');
+            
+            // Clear any animation
+            cell.style.animation = '';
         });
     }
 

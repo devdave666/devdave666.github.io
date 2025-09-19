@@ -96,28 +96,144 @@ button:hover {
     transition: all 0.3s ease;
 }
 
+/* Enhanced Invalid Cell Animations */
 .cell.invalid {
     border: 2px solid #e74c3c !important;
-    background-color: rgba(231, 76, 60, 0.15) !important;
-    animation: invalidPulse 1s ease-in-out infinite;
-    box-shadow: 0 0 8px rgba(231, 76, 60, 0.3);
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(231, 76, 60, 0.1)) !important;
+    box-shadow: 
+        0 0 15px rgba(231, 76, 60, 0.4),
+        inset 0 0 10px rgba(231, 76, 60, 0.1);
+    animation: invalidGlow 2s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
 }
 
-@keyframes invalidPulse {
+/* Different violation types get different animations */
+.cell.invalid-consecutive-horizontal,
+.cell.invalid-consecutive-vertical {
+    animation: invalidPulseStrong 1.5s ease-in-out infinite;
+}
+
+.cell.invalid-constraint {
+    animation: invalidFlash 1s ease-in-out infinite;
+    border-color: #9b59b6 !important;
+    box-shadow: 
+        0 0 15px rgba(155, 89, 182, 0.4),
+        inset 0 0 10px rgba(155, 89, 182, 0.1);
+}
+
+.cell.invalid-row-balance,
+.cell.invalid-column-balance {
+    animation: invalidWave 2s ease-in-out infinite;
+    border-color: #f39c12 !important;
+    box-shadow: 
+        0 0 15px rgba(243, 156, 18, 0.4),
+        inset 0 0 10px rgba(243, 156, 18, 0.1);
+}
+
+/* Keyframe animations */
+@keyframes invalidGlow {
     0%, 100% { 
-        background-color: rgba(231, 76, 60, 0.15);
-        border-color: #e74c3c;
+        box-shadow: 
+            0 0 15px rgba(231, 76, 60, 0.4),
+            inset 0 0 10px rgba(231, 76, 60, 0.1);
+        transform: scale(1);
     }
     50% { 
-        background-color: rgba(231, 76, 60, 0.25);
-        border-color: #c0392b;
+        box-shadow: 
+            0 0 25px rgba(231, 76, 60, 0.6),
+            inset 0 0 15px rgba(231, 76, 60, 0.2);
+        transform: scale(1.02);
     }
 }
 
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
+@keyframes invalidPulseStrong {
+    0%, 100% { 
+        transform: scale(1);
+        box-shadow: 
+            0 0 20px rgba(231, 76, 60, 0.5),
+            inset 0 0 10px rgba(231, 76, 60, 0.1);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 
+            0 0 30px rgba(231, 76, 60, 0.8),
+            inset 0 0 20px rgba(231, 76, 60, 0.3);
+    }
+}
+
+@keyframes invalidFlash {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    25% { 
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+    75% { 
+        opacity: 1;
+        transform: scale(1.03);
+    }
+}
+
+@keyframes invalidWave {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg);
+        box-shadow: 
+            0 0 15px rgba(243, 156, 18, 0.4),
+            inset 0 0 10px rgba(243, 156, 18, 0.1);
+    }
+    25% { 
+        transform: scale(1.02) rotate(0.5deg);
+        box-shadow: 
+            0 0 20px rgba(243, 156, 18, 0.5),
+            inset 0 0 15px rgba(243, 156, 18, 0.2);
+    }
+    75% { 
+        transform: scale(1.02) rotate(-0.5deg);
+        box-shadow: 
+            0 0 20px rgba(243, 156, 18, 0.5),
+            inset 0 0 15px rgba(243, 156, 18, 0.2);
+    }
+}
+
+@keyframes invalidShake {
+    0%, 100% { 
+        transform: translateX(0) scale(1);
+    }
+    10% { 
+        transform: translateX(-3px) scale(1.02);
+    }
+    20% { 
+        transform: translateX(3px) scale(1.02);
+    }
+    30% { 
+        transform: translateX(-2px) scale(1.01);
+    }
+    40% { 
+        transform: translateX(2px) scale(1.01);
+    }
+    50% { 
+        transform: translateX(-1px) scale(1);
+    }
+    60% { 
+        transform: translateX(1px) scale(1);
+    }
+    70% { 
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Smooth transitions for cells */
+.cell {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, box-shadow, border-color;
+}
+
+/* Prevent animation conflicts */
+.cell.invalid {
+    transition: none !important;
 }
 
 .modal {
