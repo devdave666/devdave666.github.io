@@ -314,10 +314,12 @@ class TangoGame {
         const violationTypes = new Map();
 
         // Debug: Log current grid state
+        console.log('=== VALIDATION DEBUG ===');
         console.log('Current grid state:');
         for (let i = 0; i < this.gridSize; i++) {
             console.log(`Row ${i}:`, this.grid[i]);
         }
+        console.log('=== CHECKING CONSECUTIVE SYMBOLS ===');
 
         // 1. COMPREHENSIVE consecutive symbols detection - horizontal
         for (let row = 0; row < this.gridSize; row++) {
@@ -370,6 +372,7 @@ class TangoGame {
 
         // 2. COMPREHENSIVE consecutive symbols detection - vertical
         for (let col = 0; col < this.gridSize; col++) {
+            console.log(`\nChecking column ${col}:`);
             // Find all consecutive sequences in this column
             let currentSymbol = null;
             let consecutiveCount = 0;
@@ -377,19 +380,22 @@ class TangoGame {
             
             for (let row = 0; row < this.gridSize; row++) {
                 const cell = this.grid[row][col];
+                console.log(`  Row ${row}: ${cell || 'empty'}`);
                 
                 if (cell && cell === currentSymbol) {
                     // Continue the sequence
                     consecutiveCount++;
+                    console.log(`    Continuing sequence: ${consecutiveCount} consecutive ${currentSymbol}`);
                 } else {
                     // Check if previous sequence was a violation (3+ consecutive)
                     if (consecutiveCount >= 3) {
-                        console.log(`Found vertical violation at col ${col}, rows ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
+                        console.log(`    VIOLATION! Found vertical violation at col ${col}, rows ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
                         // Highlight ALL cells in the consecutive sequence
                         for (let r = consecutiveStart; r < consecutiveStart + consecutiveCount; r++) {
                             const key = `${r},${col}`;
                             invalidCells.add(key);
                             violationTypes.set(key, 'consecutive-vertical');
+                            console.log(`      Highlighting (${r},${col})`);
                         }
                     }
                     
@@ -398,21 +404,24 @@ class TangoGame {
                         currentSymbol = cell;
                         consecutiveCount = 1;
                         consecutiveStart = row;
+                        console.log(`    Starting new sequence: ${currentSymbol} at row ${row}`);
                     } else {
                         currentSymbol = null;
                         consecutiveCount = 0;
                         consecutiveStart = -1;
+                        console.log(`    Resetting sequence (empty cell)`);
                     }
                 }
             }
             
             // Check final sequence at end of column
             if (consecutiveCount >= 3) {
-                console.log(`Found vertical violation at col ${col}, rows ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
+                console.log(`  FINAL VIOLATION! Found vertical violation at col ${col}, rows ${consecutiveStart}-${consecutiveStart + consecutiveCount - 1}: ${consecutiveCount} consecutive ${currentSymbol}`);
                 for (let r = consecutiveStart; r < consecutiveStart + consecutiveCount; r++) {
                     const key = `${r},${col}`;
                     invalidCells.add(key);
                     violationTypes.set(key, 'consecutive-vertical');
+                    console.log(`    Final highlighting (${r},${col})`);
                 }
             }
         }
