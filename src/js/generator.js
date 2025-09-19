@@ -6,23 +6,41 @@ export class PuzzleGenerator {
     }
 
     generatePuzzle(difficulty = 'medium') {
+        const maxAttempts = 50;
+        
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            const solution = this.generateValidSolution();
+            const puzzle = this.createUniquePuzzle(solution, difficulty);
+            
+            if (puzzle && this.hasUniqueSolution(puzzle)) {
+                console.log(`Generated unique puzzle on attempt ${attempt + 1}`);
+                return puzzle;
+            }
+        }
+        
+        // Fallback: return a puzzle even if we can't guarantee uniqueness
+        console.warn('Could not generate unique puzzle, using fallback');
         const solution = this.generateValidSolution();
+        return this.createUniquePuzzle(solution, difficulty);
+    }
+
+    createUniquePuzzle(solution, difficulty) {
         const puzzle = {
             predefinedCells: [],
             constraints: [],
             solution: solution
         };
 
-        // Difficulty-based parameters
+        // Difficulty-based parameters - more conservative for uniqueness
         const difficultySettings = {
-            easy: { minCells: 6, maxCells: 8, minConstraints: 3, maxConstraints: 5 },
-            medium: { minCells: 4, maxCells: 6, minConstraints: 5, maxConstraints: 7 },
-            hard: { minCells: 2, maxCells: 4, minConstraints: 7, maxConstraints: 9 }
+            easy: { minCells: 8, maxCells: 12, minConstraints: 4, maxConstraints: 6 },
+            medium: { minCells: 6, maxCells: 10, minConstraints: 6, maxConstraints: 8 },
+            hard: { minCells: 4, maxCells: 8, minConstraints: 8, maxConstraints: 10 }
         };
 
         const settings = difficultySettings[difficulty] || difficultySettings.medium;
 
-        // Add predefined cells based on difficulty
+        // Start with more cells and constraints to ensure uniqueness
         const cellCount = settings.minCells + Math.floor(Math.random() * (settings.maxCells - settings.minCells + 1));
         const positions = this.getRandomPositions(cellCount);
         positions.forEach(([row, col]) => {
@@ -31,9 +49,9 @@ export class PuzzleGenerator {
             });
         });
 
-        // Add constraints based on difficulty
+        // Add constraints that help ensure uniqueness
         const constraintCount = settings.minConstraints + Math.floor(Math.random() * (settings.maxConstraints - settings.minConstraints + 1));
-        puzzle.constraints = this.generateMeaningfulConstraints(solution, constraintCount);
+        puzzle.constraints = this.generateConstraintsForUniqueness(solution, constraintCount);
 
         return puzzle;
     }
@@ -117,48 +135,148 @@ export class PuzzleGenerator {
         return positions;
     }
 
-    generateMeaningfulConstraints(solution, targetCount = 6) {
+    generateConstraintsForUniqueness(solution, targetCount = 6) {
         const constraints = [];
         const used = new Set();
 
-        // Generate horizontal constraints
+        // Generate all possible constraints
+        const allConstraints = [];
+
+        // Horizontal constraints
         for (let row = 0; row < this.size; row++) {
             for (let col = 0; col < this.size - 1; col++) {
-                const key = `${row},${col}-${row},${col + 1}`;
-                if (!used.has(key)) {
-                    const value1 = solution[row][col];
-                    const value2 = solution[row][col + 1];
-                    const type = value1 === value2 ? '=' : '×';
-                    constraints.push({
-                        type,
-                        cell1: [row, col],
-                        cell2: [row, col + 1]
-                    });
-                    used.add(key);
-                }
+                const value1 = solution[row][col];
+                const value2 = solution[row][col + 1];
+                const type = value1 === value2 ? '=' : '×';
+                allConstraints.push({
+                    type,
+                    cell1: [row, col],
+                    cell2: [row, col + 1],
+                    priority: this.calculateConstraintPriority(solution, row, col, row, col + 1, type)
+                });
             }
         }
 
-        // Generate vertical constraints
+        // Vertical constraints
         for (let row = 0; row < this.size - 1; row++) {
             for (let col = 0; col < this.size; col++) {
-                const key = `${row},${col}-${row + 1},${col}`;
-                if (!used.has(key)) {
-                    const value1 = solution[row][col];
-                    const value2 = solution[row + 1][col];
-                    const type = value1 === value2 ? '=' : '×';
-                    constraints.push({
-                        type,
-                        cell1: [row, col],
-                        cell2: [row + 1, col]
-                    });
-                    used.add(key);
+                const value1 = solution[row][col];
+                const value2 = solution[row + 1][col];
+                const type = value1 === value2 ? '=' : '×';
+                allConstraints.push({
+                    type,
+                    cell1: [row, col],
+                    cell2: [row + 1, col],
+                    priority: this.calculateConstraintPriority(solution, row, col, row + 1, col, type)
+                });
+            }
+        }
+
+        // Sort by priority (higher priority constraints are more likely to ensure uniqueness)
+        allConstraints.sort((a, b) => b.priority - a.priority);
+
+        // Take the top constraints
+        return allConstraints.slice(0, targetCount).map(c => ({
+            type: c.type,
+            cell1: c.cell1,
+            cell2: c.cell2
+        }));
+    }
+
+    calculateConstraintPriority(solution, r1, c1, r2, c2, type) {
+        // Higher priority for constraints that:
+        // 1. Are in areas with fewer predefined cells nearby
+        // 2. Help break symmetries
+        // 3. Are '=' constraints (they're more restrictive)
+        
+        let priority = Math.random() * 10; // Base randomness
+        
+        if (type === '=') priority += 5; // Equality constraints are more restrictive
+        
+        // Prefer constraints in the center of the grid
+        const centerDistance = Math.abs(r1 - this.size/2) + Math.abs(c1 - this.size/2) + 
+                              Math.abs(r2 - this.size/2) + Math.abs(c2 - this.size/2);
+        priority += (this.size * 2 - centerDistance) * 0.5;
+        
+        return priority;
+    }
+
+    hasUniqueSolution(puzzle) {
+        // Create a grid with only the predefined cells
+        const testGrid = Array(this.size).fill(null)
+            .map(() => Array(this.size).fill(null));
+        
+        // Fill in predefined cells
+        puzzle.predefinedCells.forEach(({row, col, value}) => {
+            testGrid[row][col] = value;
+        });
+
+        // Count how many solutions exist
+        const solutionCount = this.countSolutions(testGrid, puzzle.constraints, 0, 0, 0, 2);
+        console.log(`Puzzle has ${solutionCount} solution(s)`);
+        return solutionCount === 1;
+    }
+
+    countSolutions(grid, constraints, row, col, count, maxCount) {
+        // Early termination if we've found more than one solution
+        if (count >= maxCount) return count;
+        
+        if (col >= this.size) {
+            row++;
+            col = 0;
+        }
+        
+        if (row >= this.size) {
+            return count + 1; // Found a complete solution
+        }
+
+        // If cell is already filled, move to next
+        if (grid[row][col] !== null) {
+            return this.countSolutions(grid, constraints, row, col + 1, count, maxCount);
+        }
+
+        let totalCount = count;
+        const symbols = ['☀️', '🌑'];
+
+        for (const symbol of symbols) {
+            if (this.isValidPlacementWithConstraints(grid, constraints, row, col, symbol)) {
+                grid[row][col] = symbol;
+                totalCount = this.countSolutions(grid, constraints, row, col + 1, totalCount, maxCount);
+                grid[row][col] = null;
+                
+                // Early termination
+                if (totalCount >= maxCount) break;
+            }
+        }
+
+        return totalCount;
+    }
+
+    isValidPlacementWithConstraints(grid, constraints, row, col, symbol) {
+        // First check basic placement rules
+        if (!this.isValidPlacement(grid, row, col, symbol)) {
+            return false;
+        }
+
+        // Then check constraints
+        for (const constraint of constraints) {
+            const [r1, c1] = constraint.cell1;
+            const [r2, c2] = constraint.cell2;
+            
+            // If this placement affects a constraint
+            if ((row === r1 && col === c1) || (row === r2 && col === c2)) {
+                const val1 = (row === r1 && col === c1) ? symbol : grid[r1][c1];
+                const val2 = (row === r2 && col === c2) ? symbol : grid[r2][c2];
+                
+                // If both cells are filled, check constraint
+                if (val1 !== null && val2 !== null) {
+                    if (constraint.type === '=' && val1 !== val2) return false;
+                    if (constraint.type === '×' && val1 === val2) return false;
                 }
             }
         }
 
-        // Shuffle and take the target number of constraints
-        return this.shuffleArray(constraints).slice(0, targetCount);
+        return true;
     }
 
     shuffleArray(array) {

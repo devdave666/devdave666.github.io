@@ -386,39 +386,37 @@ class TangoGame {
     checkWinCondition() {
         // Check if grid is complete
         const complete = this.grid.every(row => row.every(cell => cell !== null));
-        if (!complete) {
-            console.log('Grid not complete yet');
-            return;
-        }
+        if (!complete) return;
 
-        // Check if there are any validation errors
-        const invalidCells = new Set();
-        const violationTypes = new Map();
-        
-        // Run validation logic to check for errors
-        this.runValidationCheck(invalidCells, violationTypes);
-        
-        if (invalidCells.size > 0) {
-            console.log('Grid has validation errors, cannot win yet:', Array.from(invalidCells));
-            return;
-        }
-
-        // If no validation errors, the puzzle is solved!
-        clearInterval(this.timerInterval);
-        const timeTaken = Math.floor((new Date() - this.startTime) / 1000);
-        const timeString = this.formatTime(timeTaken);
-        
-        // Clear highlights when puzzle is solved
-        this.clearInvalidHighlights();
-        
-        // Save stats
-        this.stats.recordWin(timeTaken, this.difficulty);
-        
-        setTimeout(() => {
-            if (confirm(`🎉 Fantastic job! You solved the puzzle in ${timeString}! Would you like to start a new game?`)) {
-                this.newGame();
+        // Check if solution matches exactly (since we now ensure unique solutions)
+        let isCorrect = true;
+        for (let i = 0; i < this.gridSize; i++) {
+            for (let j = 0; j < this.gridSize; j++) {
+                if (this.grid[i][j] !== this.solution[i][j]) {
+                    isCorrect = false;
+                    break;
+                }
             }
-        }, 100);
+            if (!isCorrect) break;
+        }
+
+        if (isCorrect) {
+            clearInterval(this.timerInterval);
+            const timeTaken = Math.floor((new Date() - this.startTime) / 1000);
+            const timeString = this.formatTime(timeTaken);
+            
+            // Clear highlights when puzzle is solved
+            this.clearInvalidHighlights();
+            
+            // Save stats
+            this.stats.recordWin(timeTaken, this.difficulty);
+            
+            setTimeout(() => {
+                if (confirm(`🎉 Fantastic job! You solved the puzzle in ${timeString}! Would you like to start a new game?`)) {
+                    this.newGame();
+                }
+            }, 100);
+        }
     }
 
     runValidationCheck(invalidCells, violationTypes) {
