@@ -13,6 +13,7 @@ class TangoGame {
         this.solution = null;
         this.startTime = null;
         this.timerInterval = null;
+        this.validationTimeout = null; // For managing validation delays
         this.stats = new GameStats();
         this.difficulty = this.loadDifficulty();
         this.setupGame();
@@ -50,6 +51,11 @@ class TangoGame {
     }
 
     initializePuzzle() {
+        // Clear any pending validation timeout
+        if (this.validationTimeout) {
+            clearTimeout(this.validationTimeout);
+        }
+        
         // Show loading indicator
         this.showLoadingIndicator();
         
@@ -148,15 +154,25 @@ class TangoGame {
         const currentValue = this.grid[row][col];
         const newValue = !currentValue ? '☀️' : currentValue === '☀️' ? '🌑' : null;
         
+        // Clear any pending validation timeout
+        if (this.validationTimeout) {
+            clearTimeout(this.validationTimeout);
+        }
+        
         // Always allow the move
         this.history.push({row, col, value: currentValue});
         this.grid[row][col] = newValue;
         this.updateCell(row, col);
 
-        // Add delay before validation to let user cycle through symbols
-        setTimeout(() => {
+        // If cell was cleared (became null), validate immediately to remove highlights
+        if (newValue === null) {
             this.validateAndHighlightErrors();
-        }, 500);
+        } else {
+            // Add longer delay before validation to let user cycle through symbols
+            this.validationTimeout = setTimeout(() => {
+                this.validateAndHighlightErrors();
+            }, 800); // Increased from 500ms to 800ms
+        }
 
         this.checkWinCondition();
     }
@@ -240,16 +256,26 @@ class TangoGame {
 
     undo() {
         if (this.history.length > 0) {
+            // Clear any pending validation timeout
+            if (this.validationTimeout) {
+                clearTimeout(this.validationTimeout);
+            }
+            
             const lastMove = this.history.pop();
             this.grid[lastMove.row][lastMove.col] = lastMove.value;
             this.updateCell(lastMove.row, lastMove.col);
             
-            // Immediately revalidate after undo
+            // Immediately revalidate after undo to remove/update highlights
             this.validateAndHighlightErrors();
         }
     }
 
     clearGrid() {
+        // Clear any pending validation timeout
+        if (this.validationTimeout) {
+            clearTimeout(this.validationTimeout);
+        }
+        
         // Keep fixed cells, clear others
         for (let i = 0; i < this.gridSize; i++) {
             for (let j = 0; j < this.gridSize; j++) {
@@ -260,6 +286,8 @@ class TangoGame {
             }
         }
         this.history = [];
+        
+        // Immediately clear all highlights since grid is cleared
         this.clearInvalidHighlights();
     }
 
